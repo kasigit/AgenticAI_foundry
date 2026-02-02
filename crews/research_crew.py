@@ -24,6 +24,38 @@ from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
 
+# Ollama URL - auto-detect Docker vs local environment
+def _get_ollama_host():
+    """Determine the correct Ollama host URL."""
+    # First check if explicitly set
+    if os.environ.get("OLLAMA_HOST"):
+        return os.environ.get("OLLAMA_HOST")
+    
+    # Try localhost first (works when running outside Docker)
+    try:
+        import urllib.request
+        req = urllib.request.Request("http://localhost:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=1) as response:
+            if response.status == 200:
+                return "http://localhost:11434"
+    except Exception:
+        pass
+    
+    # Try host.docker.internal (works in Docker Desktop on Mac/Windows)
+    try:
+        import urllib.request
+        req = urllib.request.Request("http://host.docker.internal:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=1) as response:
+            if response.status == 200:
+                return "http://host.docker.internal:11434"
+    except Exception:
+        pass
+    
+    # Default to localhost (will fail gracefully later with helpful message)
+    return "http://localhost:11434"
+
+OLLAMA_HOST = _get_ollama_host()
+
 # CrewAI requires OPENAI_API_KEY to be set at import time, even if using Ollama.
 # We set a dummy value here. The actual key is passed explicitly to ChatOpenAI.
 if not os.environ.get("OPENAI_API_KEY"):
@@ -88,7 +120,7 @@ PROVIDER_CONFIGS: Dict[str, ProviderConfig] = {
         model="llama3.2",
         requires_api_key=False,
         api_key_env=None,
-        base_url="http://localhost:11434",
+        base_url=OLLAMA_HOST,
         cost_per_1k_input_tokens=0.0,
         cost_per_1k_output_tokens=0.0,
         description="Free, runs locally. Requires Ollama installed."
@@ -262,7 +294,7 @@ def check_ollama_running() -> bool:
     """Check if Ollama server is running."""
     try:
         import urllib.request
-        req = urllib.request.Request("http://localhost:11434/api/tags")
+        req = urllib.request.Request(f"{OLLAMA_HOST}/api/tags")
         with urllib.request.urlopen(req, timeout=2) as response:
             return response.status == 200
     except Exception:
@@ -274,7 +306,7 @@ def check_ollama_model(model: str = "llama3.2") -> bool:
     try:
         import urllib.request
         import json
-        req = urllib.request.Request("http://localhost:11434/api/tags")
+        req = urllib.request.Request(f"{OLLAMA_HOST}/api/tags")
         with urllib.request.urlopen(req, timeout=2) as response:
             data = json.loads(response.read().decode())
             models = [m.get("name", "").split(":")[0] for m in data.get("models", [])]
