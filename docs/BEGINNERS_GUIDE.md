@@ -338,15 +338,145 @@ AgenticAI_foundry/
 │   ├── 1_LLM_Cost_Calculator.py   # Module 1 demo
 │   └── 2_Multi_Agent_Demo.py      # Module 2 demo ← The agent demo
 │
-├── crews/
+├── crews/                          # 🚀 THE HEART OF MULTI-AGENT LOGIC
 │   ├── __init__.py                # Makes this a Python package
-│   └── research_crew.py           # The actual agent logic
+│   └── research_crew.py           # The actual agent definitions & orchestration
 │
 └── docs/
     ├── DOCKER_GUIDE.md            # Docker setup help
     ├── CREWAI_SETUP.md            # Quick setup reference
     └── BEGINNERS_GUIDE.md         # This file!
 ```
+
+### What is the `crews/` Folder?
+
+The `crews/` folder is where all the **multi-agent logic** lives. Think of it as the "brain" of the demo while the `pages/` folder is the "face" (the user interface).
+
+**Why separate them?**
+
+| Folder | Purpose | Analogy |
+|--------|---------|---------|
+| `pages/` | User interface (buttons, displays) | The dashboard of a car |
+| `crews/` | Agent logic (AI coordination) | The engine under the hood |
+
+This separation means you can:
+- **Reuse crews** in different interfaces (web, CLI, API)
+- **Test agents** independently of the UI
+- **Build new crews** for different tasks (sales, support, analysis)
+
+### Inside `research_crew.py`
+
+This file contains everything needed to run a multi-agent research team:
+
+```python
+# 1. CONFIGURATION - Define providers (Ollama, OpenAI)
+PROVIDER_CONFIGS = {
+    "ollama": ProviderConfig(...),    # Free, local AI
+    "openai": ProviderConfig(...),    # Paid, cloud AI
+}
+
+# 2. TELEMETRY - Track performance metrics
+@dataclass
+class AgentTelemetry:
+    duration_seconds: float    # How long agent took
+    input_tokens: int          # Tokens sent to AI
+    output_tokens: int         # Tokens received back
+    ...
+
+# 3. AGENT DEFINITIONS - The three specialists
+def create_research_crew(llm):
+    researcher = Agent(
+        role="Research Analyst",
+        goal="Gather comprehensive, accurate information",
+        backstory="You are an experienced researcher..."
+    )
+    writer = Agent(...)
+    editor = Agent(...)
+    return {"Researcher": researcher, "Writer": writer, "Editor": editor}
+
+# 4. TASK DEFINITIONS - What each agent does
+def create_tasks(agents, topic):
+    research_task = Task(description=f"Research {topic}...", agent=agents["Researcher"])
+    writing_task = Task(description="Write a brief...", agent=agents["Writer"])
+    editing_task = Task(description="Polish the content...", agent=agents["Editor"])
+    return [research_task, writing_task, editing_task]
+
+# 5. EXECUTION - Run the crew and collect telemetry
+def run_research_crew(topic, provider, ...):
+    llm = get_llm(provider)           # Get AI model
+    agents = create_research_crew(llm) # Create agents
+    tasks = create_tasks(agents, topic) # Define tasks
+    crew = Crew(agents=..., tasks=...)  # Assemble crew
+    result = crew.kickoff()             # Run!
+    return CrewResult(output=result, telemetry=...)
+```
+
+### How the UI and Crews Connect
+
+When you click "Run Research Crew" in the browser:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  BROWSER (what you see)                                         │
+│  pages/2_Multi_Agent_Demo.py                                    │
+│                                                                 │
+│  ┌─────────────────┐                                           │
+│  │ [Run Research]  │ ◄── You click this                        │
+│  └────────┬────────┘                                           │
+└───────────┼─────────────────────────────────────────────────────┘
+            │
+            │ calls
+            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  CREWS ENGINE (what runs behind the scenes)                     │
+│  crews/research_crew.py                                         │
+│                                                                 │
+│  run_research_crew(topic="AI in healthcare", provider="ollama") │
+│            │                                                    │
+│            ├── Creates LLM connection                          │
+│            ├── Creates 3 agents                                │
+│            ├── Creates 3 tasks                                 │
+│            ├── Runs Crew.kickoff()                             │
+│            └── Returns result + telemetry                      │
+└─────────────────────────────────────────────────────────────────┘
+            │
+            │ returns
+            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  BROWSER (displays results)                                     │
+│                                                                 │
+│  📊 Summary Metrics: 45.2s | 3,421 tokens | $0.0012            │
+│  📄 Final Output: "AI in healthcare is transforming..."        │
+│  📈 Charts: Duration by agent, Token usage                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Building Your Own Crews
+
+Once you understand this pattern, you can create new crews for any task:
+
+```python
+# Example: Customer Support Crew
+support_crew/
+├── __init__.py
+└── support_crew.py
+    ├── intake_agent      # Understands customer issue
+    ├── solution_agent    # Finds answers in knowledge base
+    └── response_agent    # Crafts friendly reply
+
+# Example: Code Review Crew  
+code_crew/
+├── __init__.py
+└── code_crew.py
+    ├── analyzer_agent    # Reads and understands code
+    ├── security_agent    # Checks for vulnerabilities
+    └── reviewer_agent    # Suggests improvements
+```
+
+The pattern is always the same:
+1. **Define agents** with roles, goals, backstories
+2. **Define tasks** with descriptions and agent assignments
+3. **Create a crew** and call `kickoff()`
 
 ### What Happens When You Click "Run"
 
