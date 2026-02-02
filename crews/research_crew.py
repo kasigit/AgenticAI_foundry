@@ -21,11 +21,10 @@ from typing import Optional, Generator, Dict, Any
 from dataclasses import dataclass
 from enum import Enum
 
-# Prevent CrewAI from erroring on import when no API key is set
-# We set a temporary placeholder, import CrewAI, then remove it
-_ORIGINAL_KEY = os.environ.get("OPENAI_API_KEY")
-if not _ORIGINAL_KEY:
-    os.environ["OPENAI_API_KEY"] = "temp-for-import-only"
+# CrewAI requires OPENAI_API_KEY to be set at import time, even if using Ollama.
+# We set a dummy value here. The actual key is passed explicitly to ChatOpenAI.
+if not os.environ.get("OPENAI_API_KEY"):
+    os.environ["OPENAI_API_KEY"] = "not-used-we-pass-key-explicitly"
 
 # CrewAI imports
 try:
@@ -33,12 +32,6 @@ try:
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
-
-# Remove the temporary key after import (restore original if there was one)
-if _ORIGINAL_KEY:
-    os.environ["OPENAI_API_KEY"] = _ORIGINAL_KEY
-elif "OPENAI_API_KEY" in os.environ:
-    del os.environ["OPENAI_API_KEY"]
 
 # LLM provider imports
 try:
@@ -135,10 +128,14 @@ def get_llm(provider: str, api_key: Optional[str] = None, model: Optional[str] =
         if not OPENAI_AVAILABLE:
             raise ImportError("langchain-openai not installed. Run: pip install langchain-openai")
         
-        # Get API key from parameter or env
-        key = api_key or os.getenv(config.api_key_env)
+        # Get API key - prefer explicit parameter over env var
+        # Ignore env var if it's our dummy placeholder
+        env_key = os.getenv(config.api_key_env)
+        if env_key and env_key.startswith("not-used-"):
+            env_key = None
+        key = api_key or env_key
         if not key:
-            raise ValueError(f"OpenAI API key required. Set {config.api_key_env} or pass api_key parameter.")
+            raise ValueError(f"OpenAI API key required. Enter it in the sidebar or set {config.api_key_env}.")
         
         return ChatOpenAI(
             model=model_name,
@@ -505,10 +502,11 @@ Examples:
                     print(f"      └─ ⚠️  Ollama not running. Start with: ollama serve")
             
             if name == "openai" and name in available:
-                if os.getenv("OPENAI_API_KEY"):
+                env_key = os.getenv("OPENAI_API_KEY")
+                if env_key and not env_key.startswith("not-used-"):
                     print(f"      └─ API key found in environment")
                 else:
-                    print(f"      └─ ⚠️  No API key. Set OPENAI_API_KEY")
+                    print(f"      └─ ⚠️  No API key. Set OPENAI_API_KEY or enter in sidebar")
         
         print()
         return
@@ -526,7 +524,9 @@ Examples:
         if not OPENAI_AVAILABLE:
             print("❌ OpenAI support not installed. Run: pip install langchain-openai")
             sys.exit(1)
-        if not args.api_key and not os.getenv("OPENAI_API_KEY"):
+        env_key = os.getenv("OPENAI_API_KEY")
+        has_real_env_key = env_key and not env_key.startswith("not-used-")
+        if not args.api_key and not has_real_env_key:
             print("❌ OpenAI API key required. Set OPENAI_API_KEY or use --api-key")
             sys.exit(1)
     
