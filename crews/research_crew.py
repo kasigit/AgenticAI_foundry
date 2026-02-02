@@ -63,32 +63,26 @@ if not os.environ.get("OPENAI_API_KEY"):
 
 # CrewAI imports
 try:
-    from crewai import Agent, Task, Crew, Process
+    from crewai import Agent, Task, Crew, Process, LLM
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
 
-# LLM provider imports
+# LLM provider imports (for fallback/compatibility)
 try:
     from langchain_openai import ChatOpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
 
+# Check if litellm is available (required for CrewAI's native LLM)
 try:
-    # Try newer langchain-ollama first (recommended)
-    from langchain_ollama import ChatOllama
-    OLLAMA_AVAILABLE = True
-    OLLAMA_CLASS = "ChatOllama"
+    import litellm
+    LITELLM_AVAILABLE = True
 except ImportError:
-    try:
-        # Fall back to langchain-community
-        from langchain_community.llms import Ollama
-        OLLAMA_AVAILABLE = True
-        OLLAMA_CLASS = "Ollama"
-    except ImportError:
-        OLLAMA_AVAILABLE = False
-        OLLAMA_CLASS = None
+    LITELLM_AVAILABLE = False
+
+OLLAMA_AVAILABLE = True  # Ollama support via CrewAI's native LLM class
 
 # Token counting
 try:
@@ -255,23 +249,18 @@ def get_llm(provider: str, api_key: Optional[str] = None, model: Optional[str] =
     model_name = model or config.model
     
     if provider == "ollama":
-        if not OLLAMA_AVAILABLE:
-            raise ImportError("Ollama support not installed. Run: pip install langchain-ollama")
+        if not LITELLM_AVAILABLE:
+            raise ImportError("litellm not installed. Run: pip install litellm")
         
-        if OLLAMA_CLASS == "ChatOllama":
-            return ChatOllama(
-                model=model_name,
-                base_url=config.base_url
-            )
-        else:
-            return Ollama(
-                model=model_name,
-                base_url=config.base_url
-            )
+        # Use CrewAI's native LLM class with ollama/ prefix
+        return LLM(
+            model=f"ollama/{model_name}",
+            base_url=config.base_url
+        )
     
     elif provider == "openai":
-        if not OPENAI_AVAILABLE:
-            raise ImportError("langchain-openai not installed. Run: pip install langchain-openai")
+        if not LITELLM_AVAILABLE:
+            raise ImportError("litellm not installed. Run: pip install litellm")
         
         # Get API key - prefer explicit parameter over env var
         # Ignore env var if it's our dummy placeholder
@@ -282,10 +271,10 @@ def get_llm(provider: str, api_key: Optional[str] = None, model: Optional[str] =
         if not key:
             raise ValueError(f"OpenAI API key required. Enter it in the sidebar or set {config.api_key_env}.")
         
-        return ChatOpenAI(
-            model=model_name,
-            api_key=key,
-            temperature=0.7
+        # Use CrewAI's native LLM class
+        return LLM(
+            model=f"openai/{model_name}",
+            api_key=key
         )
     
     else:
@@ -296,10 +285,9 @@ def get_available_providers() -> Dict[str, ProviderConfig]:
     """Return configs for providers that are installed and available."""
     available = {}
     
-    if OLLAMA_AVAILABLE:
+    # Both providers require litellm for CrewAI's native LLM class
+    if LITELLM_AVAILABLE:
         available["ollama"] = PROVIDER_CONFIGS["ollama"]
-    
-    if OPENAI_AVAILABLE:
         available["openai"] = PROVIDER_CONFIGS["openai"]
     
     return available
