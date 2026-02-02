@@ -1,10 +1,7 @@
-# Additional dependencies for Multi-Agent Demo (Module 2)
-# 
+# CrewAI and Multi-Agent Dependencies
 # Install with: pip install -r requirements-crewai.txt
-#
-# Note: These may have version conflicts with older Streamlit.
-# The main app (LLM Cost Calculator) works without these.
 
 crewai>=0.28.0
-langchain-community>=0.0.20
+langchain-ollama>=0.1.0
 langchain-openai>=0.0.5
+tiktoken>=0.5.0
