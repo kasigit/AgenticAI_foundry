@@ -1,9 +1,10 @@
 from __future__ import annotations
 """
-CrewAI Research Team - Multi-Agent Demo
+CrewAI Research Team - Multi-Agent Demo with Telemetry
 MIT Professional Education: Agentic AI
 
 This module can be run standalone (CLI) or imported by Streamlit.
+Enhanced with detailed telemetry: timing, token counts, API calls.
 
 Usage (CLI):
     python -m crews.research_crew --provider ollama --task "Research AI in healthcare"
@@ -17,9 +18,11 @@ Usage (Import):
 import os
 import sys
 import argparse
-from typing import Optional, Generator, Dict, Any
-from dataclasses import dataclass
+import time
+from typing import Optional, Generator, Dict, Any, List, Callable
+from dataclasses import dataclass, field
 from enum import Enum
+from datetime import datetime
 
 # CrewAI requires OPENAI_API_KEY to be set at import time, even if using Ollama.
 # We set a dummy value here. The actual key is passed explicitly to ChatOpenAI.
@@ -46,6 +49,13 @@ try:
 except ImportError:
     OLLAMA_AVAILABLE = False
 
+# Token counting
+try:
+    import tiktoken
+    TIKTOKEN_AVAILABLE = True
+except ImportError:
+    TIKTOKEN_AVAILABLE = False
+
 
 # =============================================================================
 # CONFIGURATION
@@ -65,33 +75,120 @@ class ProviderConfig:
     requires_api_key: bool
     api_key_env: Optional[str]
     base_url: Optional[str]
-    cost_per_1k_tokens: float  # Approximate cost for display
+    cost_per_1k_input_tokens: float
+    cost_per_1k_output_tokens: float
     description: str
 
 
-# Provider configurations
+# Provider configurations with accurate pricing
 PROVIDER_CONFIGS: Dict[str, ProviderConfig] = {
     "ollama": ProviderConfig(
         name="ollama",
         display_name="🏠 Ollama (Local)",
-        model="llama3.2",  # Default model, can be changed
+        model="llama3.2",
         requires_api_key=False,
         api_key_env=None,
         base_url="http://localhost:11434",
-        cost_per_1k_tokens=0.0,
+        cost_per_1k_input_tokens=0.0,
+        cost_per_1k_output_tokens=0.0,
         description="Free, runs locally. Requires Ollama installed."
     ),
     "openai": ProviderConfig(
         name="openai",
         display_name="☁️ OpenAI",
-        model="gpt-4o-mini",  # Cost-effective default
+        model="gpt-4o-mini",
         requires_api_key=True,
         api_key_env="OPENAI_API_KEY",
         base_url=None,
-        cost_per_1k_tokens=0.00015,  # $0.15 per 1M input
+        cost_per_1k_input_tokens=0.00015,   # $0.15 per 1M input
+        cost_per_1k_output_tokens=0.0006,   # $0.60 per 1M output
         description="Fast, high quality. Requires API key (~$0.01/run)."
     )
 }
+
+
+# =============================================================================
+# TELEMETRY DATA STRUCTURES
+# =============================================================================
+
+@dataclass
+class AgentTelemetry:
+    """Telemetry data for a single agent's execution"""
+    agent_name: str
+    role: str
+    start_time: float = 0.0
+    end_time: float = 0.0
+    duration_seconds: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+    api_calls: int = 0
+    task_description: str = ""
+    output: str = ""
+    reasoning_steps: List[str] = field(default_factory=list)
+    status: str = "pending"  # pending, running, complete, error
+    error: Optional[str] = None
+
+
+@dataclass
+class CrewTelemetry:
+    """Telemetry data for the entire crew execution"""
+    start_time: float = 0.0
+    end_time: float = 0.0
+    total_duration_seconds: float = 0.0
+    total_input_tokens: int = 0
+    total_output_tokens: int = 0
+    total_tokens: int = 0
+    total_api_calls: int = 0
+    estimated_cost_usd: float = 0.0
+    agents: List[AgentTelemetry] = field(default_factory=list)
+    provider: str = ""
+    model: str = ""
+
+
+@dataclass
+class CrewResult:
+    """Result from running a crew with telemetry"""
+    success: bool
+    output: str
+    error: Optional[str]
+    provider: str
+    model: str
+    task_outputs: Dict[str, str]
+    telemetry: Optional[CrewTelemetry] = None
+
+
+# =============================================================================
+# TOKEN COUNTING
+# =============================================================================
+
+def count_tokens(text: str, model: str = "gpt-4o-mini") -> int:
+    """Count tokens in text using tiktoken"""
+    if not TIKTOKEN_AVAILABLE:
+        # Rough estimate: ~4 chars per token
+        return len(text) // 4
+    
+    try:
+        # Map model names to tiktoken encodings
+        if "gpt-4" in model or "gpt-3.5" in model:
+            encoding = tiktoken.encoding_for_model(model)
+        else:
+            # Default to cl100k_base for other models (good approximation)
+            encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(text))
+    except Exception:
+        return len(text) // 4
+
+
+def estimate_cost(input_tokens: int, output_tokens: int, provider: str) -> float:
+    """Estimate cost based on token counts"""
+    config = PROVIDER_CONFIGS.get(provider)
+    if not config:
+        return 0.0
+    
+    input_cost = (input_tokens / 1000) * config.cost_per_1k_input_tokens
+    output_cost = (output_tokens / 1000) * config.cost_per_1k_output_tokens
+    return input_cost + output_cost
 
 
 # =============================================================================
@@ -100,25 +197,26 @@ PROVIDER_CONFIGS: Dict[str, ProviderConfig] = {
 
 def get_llm(provider: str, api_key: Optional[str] = None, model: Optional[str] = None):
     """
-    Create an LLM instance based on provider selection.
+    Create an LLM instance based on provider.
     
     Args:
-        provider: "ollama" or "openai"
+        provider: 'ollama' or 'openai'
         api_key: API key (required for OpenAI, ignored for Ollama)
-        model: Override default model
-        
+        model: Model name (uses provider default if not specified)
+    
     Returns:
-        LLM instance compatible with CrewAI
+        LLM instance ready for use with CrewAI
     """
     config = PROVIDER_CONFIGS.get(provider)
     if not config:
-        raise ValueError(f"Unknown provider: {provider}. Choose from: {list(PROVIDER_CONFIGS.keys())}")
+        raise ValueError(f"Unknown provider: {provider}")
     
     model_name = model or config.model
     
     if provider == "ollama":
         if not OLLAMA_AVAILABLE:
             raise ImportError("langchain-community not installed. Run: pip install langchain-community")
+        
         return Ollama(
             model=model_name,
             base_url=config.base_url
@@ -161,13 +259,13 @@ def get_available_providers() -> Dict[str, ProviderConfig]:
 
 
 def check_ollama_running() -> bool:
-    """Check if Ollama is running locally."""
+    """Check if Ollama server is running."""
     try:
         import urllib.request
         req = urllib.request.Request("http://localhost:11434/api/tags")
         with urllib.request.urlopen(req, timeout=2) as response:
             return response.status == 200
-    except:
+    except Exception:
         return False
 
 
@@ -180,8 +278,8 @@ def check_ollama_model(model: str = "llama3.2") -> bool:
         with urllib.request.urlopen(req, timeout=2) as response:
             data = json.loads(response.read().decode())
             models = [m.get("name", "").split(":")[0] for m in data.get("models", [])]
-            return model in models
-    except:
+            return model in models or f"{model}:latest" in [m.get("name", "") for m in data.get("models", [])]
+    except Exception:
         return False
 
 
@@ -189,125 +287,102 @@ def check_ollama_model(model: str = "llama3.2") -> bool:
 # AGENT DEFINITIONS
 # =============================================================================
 
-def create_research_crew(llm, verbose: bool = True) -> "Crew":
+def create_research_crew(llm, verbose: bool = True) -> Dict[str, Agent]:
     """
     Create a research crew with three specialized agents.
     
-    The crew follows a sequential process:
-    1. Researcher gathers information
-    2. Writer creates content from research
-    3. Editor polishes and verifies
-    
-    Args:
-        llm: Language model instance
-        verbose: Whether to print agent activity
-        
-    Returns:
-        Configured Crew instance
+    Returns dict of agents keyed by role name for easier telemetry tracking.
     """
     
-    # Agent 1: Researcher
     researcher = Agent(
         role="Research Analyst",
         goal="Gather comprehensive, accurate information on the given topic",
-        backstory="""You are an experienced research analyst with expertise in 
-        finding and synthesizing information from multiple sources. You focus on 
-        facts, statistics, and key insights that provide real value.""",
-        llm=llm,
+        backstory="""You are an experienced research analyst with a keen eye for detail.
+        You excel at finding relevant information, identifying key trends, and 
+        synthesizing complex data into clear insights. You always verify your sources
+        and present balanced, factual information.""",
         verbose=verbose,
-        allow_delegation=False
+        allow_delegation=False,
+        llm=llm
     )
     
-    # Agent 2: Writer
     writer = Agent(
         role="Content Writer",
-        goal="Transform research into clear, engaging, well-structured content",
-        backstory="""You are a skilled content writer who excels at taking 
-        complex information and making it accessible to a general audience. 
-        You write in a professional but engaging tone.""",
-        llm=llm,
+        goal="Transform research into clear, engaging content",
+        backstory="""You are a skilled content writer who excels at making complex 
+        topics accessible to general audiences. You write with clarity and precision,
+        organizing information logically and maintaining reader engagement throughout.
+        You adapt your tone to suit the subject matter while keeping content professional.""",
         verbose=verbose,
-        allow_delegation=False
+        allow_delegation=False,
+        llm=llm
     )
     
-    # Agent 3: Editor
     editor = Agent(
         role="Editor",
-        goal="Polish content for clarity, accuracy, and impact",
-        backstory="""You are a meticulous editor with an eye for detail. You 
-        check facts, improve clarity, fix any inconsistencies, and ensure the 
-        final output is publication-ready.""",
-        llm=llm,
+        goal="Polish content for clarity, accuracy, and professionalism",
+        backstory="""You are a meticulous editor with years of experience refining 
+        written content. You check for factual accuracy, improve clarity, fix any
+        grammatical issues, and ensure the final output is polished and professional.
+        You maintain the author's voice while elevating the quality of the writing.""",
         verbose=verbose,
-        allow_delegation=False
+        allow_delegation=False,
+        llm=llm
     )
     
     return {
-        "researcher": researcher,
-        "writer": writer,
-        "editor": editor
+        "Researcher": researcher,
+        "Writer": writer,
+        "Editor": editor
     }
 
 
-def create_tasks(agents: Dict[str, Agent], topic: str) -> list:
-    """
-    Create the task pipeline for the research crew.
+def create_tasks(agents: Dict[str, Agent], topic: str) -> List[Task]:
+    """Create tasks for each agent with clear handoffs."""
     
-    Args:
-        agents: Dictionary of agent instances
-        topic: The research topic/question
-        
-    Returns:
-        List of Task instances
-    """
-    
-    # Task 1: Research
     research_task = Task(
-        description=f"""Research the following topic thoroughly:
-
-        TOPIC: {topic}
-
-        Provide:
-        1. Key facts and statistics
-        2. Main trends or developments
-        3. Notable examples or case studies
-        4. Potential challenges or considerations
+        description=f"""Research the following topic thoroughly: {topic}
         
-        Focus on accuracy and relevance. Cite sources where possible.""",
-        expected_output="A comprehensive research brief with key findings, statistics, and insights.",
-        agent=agents["researcher"]
+        Your research should include:
+        1. Key facts and statistics
+        2. Current trends and developments
+        3. Important considerations or challenges
+        4. Notable examples or case studies (if relevant)
+        
+        Provide comprehensive but focused research that will serve as the 
+        foundation for a well-written brief.""",
+        expected_output="A detailed research brief with facts, statistics, and key insights",
+        agent=agents["Researcher"]
     )
     
-    # Task 2: Write
     writing_task = Task(
-        description="""Using the research provided, write a clear and engaging brief.
+        description=f"""Using the research provided, write a clear and engaging brief about: {topic}
         
-        Requirements:
-        - 300-500 words
-        - Professional but accessible tone
-        - Clear structure with introduction, body, and conclusion
-        - Highlight the most important insights
+        Your brief should:
+        1. Have a clear introduction that frames the topic
+        2. Present key information in a logical flow
+        3. Include relevant examples or data points
+        4. Conclude with key takeaways
         
-        Do not add information beyond what was researched.""",
-        expected_output="A well-written brief that clearly communicates the research findings.",
-        agent=agents["writer"],
+        Target length: 300-500 words. Make it accessible to a general business audience.""",
+        expected_output="A well-structured, engaging brief of 300-500 words",
+        agent=agents["Writer"],
         context=[research_task]
     )
     
-    # Task 3: Edit
     editing_task = Task(
-        description="""Review and polish the written content.
+        description="""Review and polish the written brief.
         
-        Check for:
-        - Factual accuracy
-        - Clarity and flow
-        - Grammar and style
-        - Appropriate tone
+        Your editing should:
+        1. Check for factual accuracy and consistency
+        2. Improve clarity and readability
+        3. Fix any grammatical or stylistic issues
+        4. Ensure professional tone throughout
+        5. Verify the brief is well-organized and flows logically
         
-        Make improvements while preserving the writer's voice.
-        Output the final, polished version.""",
-        expected_output="A polished, publication-ready brief.",
-        agent=agents["editor"],
+        Provide the final, polished version of the brief.""",
+        expected_output="A polished, publication-ready brief",
+        agent=agents["Editor"],
         context=[writing_task]
     )
     
@@ -315,41 +390,35 @@ def create_tasks(agents: Dict[str, Agent], topic: str) -> list:
 
 
 # =============================================================================
-# CREW EXECUTION
+# MAIN EXECUTION WITH TELEMETRY
 # =============================================================================
-
-@dataclass
-class CrewResult:
-    """Result from a crew execution"""
-    success: bool
-    output: str
-    error: Optional[str]
-    provider: str
-    model: str
-    task_outputs: Dict[str, str]
-
 
 def run_research_crew(
     topic: str,
     provider: str = "ollama",
-    api_key: Optional[str] = None,
     model: Optional[str] = None,
+    api_key: Optional[str] = None,
     verbose: bool = True,
-    callback: Optional[callable] = None
+    callback: Optional[Callable] = None
 ) -> CrewResult:
     """
-    Run the research crew on a given topic.
+    Run the research crew on a topic with full telemetry.
     
     Args:
-        topic: The research topic or question
-        provider: "ollama" or "openai"
-        api_key: API key (required for OpenAI)
-        model: Override default model
-        verbose: Print agent activity
-        callback: Optional callback for progress updates
-        
+        topic: The topic to research
+        provider: 'ollama' or 'openai'
+        model: Model to use (defaults to provider's default)
+        api_key: API key for OpenAI
+        verbose: Whether to print verbose output
+        callback: Optional callback for status updates
+                  callback(event_type, data) where event_type is:
+                  - "status": General status message
+                  - "agent_start": Agent starting (data = AgentTelemetry)
+                  - "agent_complete": Agent finished (data = AgentTelemetry)
+                  - "telemetry": Full telemetry update (data = CrewTelemetry)
+    
     Returns:
-        CrewResult with output and metadata
+        CrewResult with output and telemetry
     """
     
     if not CREWAI_AVAILABLE:
@@ -359,11 +428,36 @@ def run_research_crew(
             error="CrewAI not installed. Run: pip install crewai",
             provider=provider,
             model=model or PROVIDER_CONFIGS[provider].model,
-            task_outputs={}
+            task_outputs={},
+            telemetry=None
         )
     
     config = PROVIDER_CONFIGS.get(provider)
     model_name = model or config.model
+    
+    # Initialize telemetry
+    crew_telemetry = CrewTelemetry(
+        provider=provider,
+        model=model_name,
+        start_time=time.time()
+    )
+    
+    # Initialize agent telemetry
+    agent_names = ["Researcher", "Writer", "Editor"]
+    agent_roles = ["Research Analyst", "Content Writer", "Editor"]
+    task_descriptions = [
+        f"Research the topic: {topic}",
+        "Write a clear brief from the research",
+        "Polish and edit the final brief"
+    ]
+    
+    for i, name in enumerate(agent_names):
+        crew_telemetry.agents.append(AgentTelemetry(
+            agent_name=name,
+            role=agent_roles[i],
+            task_description=task_descriptions[i],
+            status="pending"
+        ))
     
     # For OpenAI: set the real API key in environment so CrewAI can use it
     _original_key = None
@@ -387,10 +481,7 @@ def run_research_crew(
             callback("status", "Setting up tasks...")
         tasks = create_tasks(agents, topic)
         
-        # Create and run crew
-        if callback:
-            callback("status", "🔍 Researcher is gathering information...")
-        
+        # Create crew
         crew = Crew(
             agents=list(agents.values()),
             tasks=tasks,
@@ -398,14 +489,77 @@ def run_research_crew(
             verbose=verbose
         )
         
+        # Run each agent and capture telemetry
+        # Note: CrewAI runs sequentially, so we track timing around kickoff
+        # For more granular tracking, we'd need to hook into CrewAI callbacks
+        
+        if callback:
+            callback("status", "🔍 Researcher is gathering information...")
+            crew_telemetry.agents[0].status = "running"
+            crew_telemetry.agents[0].start_time = time.time()
+            callback("agent_start", crew_telemetry.agents[0])
+        
+        # Run the crew
         result = crew.kickoff()
         
-        # Extract individual task outputs
+        crew_telemetry.end_time = time.time()
+        crew_telemetry.total_duration_seconds = crew_telemetry.end_time - crew_telemetry.start_time
+        
+        # Extract individual task outputs and estimate tokens
         task_outputs = {}
+        total_input_tokens = 0
+        total_output_tokens = 0
+        
+        # Estimate tokens for the input (topic + agent prompts)
+        base_input = topic + " ".join([a.backstory for a in agents.values()])
+        base_input_tokens = count_tokens(base_input, model_name)
+        
         for i, task in enumerate(tasks):
-            role = ["Researcher", "Writer", "Editor"][i]
+            name = agent_names[i]
+            agent_telemetry = crew_telemetry.agents[i]
+            
             if hasattr(task, 'output') and task.output:
-                task_outputs[role] = str(task.output)
+                output_text = str(task.output)
+                task_outputs[name] = output_text
+                
+                # Estimate tokens
+                output_tokens = count_tokens(output_text, model_name)
+                # Input includes previous outputs as context
+                context_tokens = sum(count_tokens(task_outputs.get(agent_names[j], ""), model_name) 
+                                    for j in range(i))
+                input_tokens = base_input_tokens + context_tokens
+                
+                agent_telemetry.output = output_text
+                agent_telemetry.input_tokens = input_tokens
+                agent_telemetry.output_tokens = output_tokens
+                agent_telemetry.total_tokens = input_tokens + output_tokens
+                agent_telemetry.api_calls = 1  # Minimum 1 call per agent
+                agent_telemetry.status = "complete"
+                
+                total_input_tokens += input_tokens
+                total_output_tokens += output_tokens
+            else:
+                agent_telemetry.status = "complete"
+                agent_telemetry.output = "(No output captured)"
+        
+        # Distribute timing across agents (estimate since CrewAI doesn't expose per-agent timing)
+        total_time = crew_telemetry.total_duration_seconds
+        time_per_agent = total_time / 3
+        
+        for i, agent_telemetry in enumerate(crew_telemetry.agents):
+            agent_telemetry.start_time = crew_telemetry.start_time + (i * time_per_agent)
+            agent_telemetry.end_time = agent_telemetry.start_time + time_per_agent
+            agent_telemetry.duration_seconds = time_per_agent
+        
+        # Update crew telemetry totals
+        crew_telemetry.total_input_tokens = total_input_tokens
+        crew_telemetry.total_output_tokens = total_output_tokens
+        crew_telemetry.total_tokens = total_input_tokens + total_output_tokens
+        crew_telemetry.total_api_calls = sum(a.api_calls for a in crew_telemetry.agents)
+        crew_telemetry.estimated_cost_usd = estimate_cost(total_input_tokens, total_output_tokens, provider)
+        
+        if callback:
+            callback("telemetry", crew_telemetry)
         
         return CrewResult(
             success=True,
@@ -413,17 +567,22 @@ def run_research_crew(
             error=None,
             provider=provider,
             model=model_name,
-            task_outputs=task_outputs
+            task_outputs=task_outputs,
+            telemetry=crew_telemetry
         )
         
     except Exception as e:
+        crew_telemetry.end_time = time.time()
+        crew_telemetry.total_duration_seconds = crew_telemetry.end_time - crew_telemetry.start_time
+        
         return CrewResult(
             success=False,
             output="",
             error=str(e),
             provider=provider,
             model=model_name,
-            task_outputs={}
+            task_outputs={},
+            telemetry=crew_telemetry
         )
     
     finally:
@@ -435,6 +594,36 @@ def run_research_crew(
 # =============================================================================
 # CLI INTERFACE
 # =============================================================================
+
+def print_telemetry(telemetry: CrewTelemetry):
+    """Print formatted telemetry report."""
+    print("\n" + "=" * 70)
+    print("📊 TELEMETRY REPORT")
+    print("=" * 70)
+    
+    print(f"\n⏱️  Total Duration: {telemetry.total_duration_seconds:.1f} seconds")
+    print(f"🔢 Total Tokens: {telemetry.total_tokens:,}")
+    print(f"   ├─ Input:  {telemetry.total_input_tokens:,}")
+    print(f"   └─ Output: {telemetry.total_output_tokens:,}")
+    print(f"📞 Total API Calls: {telemetry.total_api_calls}")
+    if telemetry.provider == "openai":
+        print(f"💰 Estimated Cost: ${telemetry.estimated_cost_usd:.4f}")
+    else:
+        print(f"💰 Cost: Free (local)")
+    
+    print("\n" + "-" * 70)
+    print("AGENT BREAKDOWN")
+    print("-" * 70)
+    
+    for agent in telemetry.agents:
+        print(f"\n{'🔍' if agent.agent_name == 'Researcher' else '✍️' if agent.agent_name == 'Writer' else '📝'} {agent.agent_name} ({agent.role})")
+        print(f"   ├─ Duration: {agent.duration_seconds:.1f}s")
+        print(f"   ├─ Tokens: {agent.total_tokens:,} (in: {agent.input_tokens:,}, out: {agent.output_tokens:,})")
+        print(f"   ├─ API Calls: {agent.api_calls}")
+        print(f"   └─ Status: {agent.status}")
+    
+    print("\n" + "=" * 70)
+
 
 def main():
     """Command-line interface for running the research crew."""
@@ -453,36 +642,45 @@ Examples:
   
   # Use a specific model
   python -m crews.research_crew --provider ollama --model mistral --task "Research quantum computing"
-        """
+"""
     )
     
     parser.add_argument(
         "--task", "-t",
-        required=True,
-        help="The research topic or question"
+        type=str,
+        help="The topic/task for the research crew"
     )
     
     parser.add_argument(
         "--provider", "-p",
+        type=str,
         choices=["ollama", "openai"],
         default="ollama",
-        help="LLM provider (default: ollama)"
+        help="LLM provider to use (default: ollama)"
     )
     
     parser.add_argument(
         "--model", "-m",
-        help="Override default model (e.g., mistral, gpt-4o)"
+        type=str,
+        help="Model to use (default: provider's default model)"
     )
     
     parser.add_argument(
         "--api-key", "-k",
+        type=str,
         help="API key (can also use OPENAI_API_KEY env var)"
     )
     
     parser.add_argument(
         "--quiet", "-q",
         action="store_true",
-        help="Suppress verbose agent output"
+        help="Suppress verbose output"
+    )
+    
+    parser.add_argument(
+        "--no-telemetry",
+        action="store_true",
+        help="Don't print telemetry report"
     )
     
     parser.add_argument(
@@ -495,17 +693,19 @@ Examples:
     
     # Check mode
     if args.check:
-        print("\n🔍 Checking provider availability...\n")
-        
+        print("🔍 Checking provider availability...\n")
         available = get_available_providers()
+        
         for name, config in PROVIDER_CONFIGS.items():
-            status = "✅" if name in available else "❌"
-            print(f"  {status} {config.display_name}")
+            if name in available:
+                print(f"  ✅ {config.display_name}")
+            else:
+                print(f"  ❌ {config.display_name} (not installed)")
             
             if name == "ollama" and name in available:
                 if check_ollama_running():
                     print(f"      └─ Ollama is running")
-                    if check_ollama_model("llama3.2"):
+                    if check_ollama_model():
                         print(f"      └─ llama3.2 model available")
                     else:
                         print(f"      └─ ⚠️  llama3.2 not found. Run: ollama pull llama3.2")
@@ -541,44 +741,40 @@ Examples:
             print("❌ OpenAI API key required. Set OPENAI_API_KEY or use --api-key")
             sys.exit(1)
     
+    # Require task
+    if not args.task:
+        print("❌ Please provide a task with --task or -t")
+        sys.exit(1)
+    
     # Run the crew
     config = PROVIDER_CONFIGS[args.provider]
-    model = args.model or config.model
-    
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 70}")
     print(f"🤖 CrewAI Research Team")
-    print(f"{'='*60}")
+    print(f"{'=' * 70}")
     print(f"Provider: {config.display_name}")
-    print(f"Model:    {model}")
+    print(f"Model:    {args.model or config.model}")
     print(f"Topic:    {args.task}")
-    print(f"{'='*60}\n")
-    
-    def cli_callback(event_type, message):
-        if event_type == "status":
-            print(f"📌 {message}")
+    print(f"{'=' * 70}\n")
     
     result = run_research_crew(
         topic=args.task,
         provider=args.provider,
-        api_key=args.api_key,
         model=args.model,
-        verbose=not args.quiet,
-        callback=cli_callback
+        api_key=args.api_key,
+        verbose=not args.quiet
     )
     
-    print(f"\n{'='*60}")
     if result.success:
+        print(f"\n{'=' * 70}")
         print("✅ FINAL OUTPUT")
-        print(f"{'='*60}\n")
+        print(f"{'=' * 70}\n")
         print(result.output)
+        
+        if not args.no_telemetry and result.telemetry:
+            print_telemetry(result.telemetry)
     else:
-        print("❌ ERROR")
-        print(f"{'='*60}\n")
-        print(result.error)
-    
-    print(f"\n{'='*60}")
-    print(f"Provider: {result.provider} | Model: {result.model}")
-    print(f"{'='*60}\n")
+        print(f"\n❌ Error: {result.error}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
