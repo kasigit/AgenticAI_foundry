@@ -33,6 +33,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 1 — Analyze model pricing at scale",
         "api_required": False,
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/BEGINNERS_GUIDE.md",
+        "doc_label": "Beginner's Guide",
     },
     {
         "module": 2,
@@ -48,6 +50,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 2 — Observe agent collaboration and telemetry",
         "api_required": "Optional (works with free Ollama)",
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/CREWAI_SETUP.md",
+        "doc_label": "CrewAI Setup Guide",
     },
     {
         "module": 2,
@@ -63,6 +67,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 2 — Compare single-agent vs multi-agent patterns",
         "api_required": "Optional (works with free Ollama)",
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/BEGINNERS_GUIDE.md",
+        "doc_label": "Beginner's Guide",
     },
     {
         "module": 3,
@@ -78,6 +84,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 3 — Q3: How would your agent integrate with existing systems?",
         "api_required": False,
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/MCP_GUIDE.md",
+        "doc_label": "MCP Guide",
     },
 ]
 
@@ -223,6 +231,10 @@ for i in range(0, len(DEMOS), 2):
 
         learns_html = "".join(f"<li>{item}</li>" for item in d["learns"])
 
+        doc_html = ""
+        if d.get("doc_url"):
+            doc_html = f'<p style="font-size: 0.85rem; margin-top: 0.3rem;"><a href="{d["doc_url"]}" target="_blank">📖 Read the {d["doc_label"]}</a></p>'
+
         with col:
             st.markdown(f"""
             <div class="demo-card">
@@ -233,6 +245,7 @@ for i in range(0, len(DEMOS), 2):
                     {learns_html}
                 </ul>
                 <p style="font-size: 0.85rem; color: #065A82;"><strong>📝 {d['assignment']}</strong></p>
+                {doc_html}
                 {api_html}
             </div>
             """, unsafe_allow_html=True)
