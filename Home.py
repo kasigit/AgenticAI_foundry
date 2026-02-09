@@ -106,13 +106,6 @@ st.markdown("""
         color: #666;
         margin-bottom: 1.5rem;
     }
-    .hero-box {
-        background: linear-gradient(135deg, #0F2B46 0%, #1C7293 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin: 0.5rem 0 1.5rem 0;
-    }
     .module-badge {
         display: inline-block;
         background: #E8A838;
@@ -147,11 +140,7 @@ st.markdown("""
     .api-no { background: #F0FFF4; color: #2F855A; }
     .api-opt { background: #FFF3D6; color: #975A16; }
     .api-yes { background: #FFF5F5; color: #C53030; }
-    .stat-number {
-        font-size: 2.2rem;
-        font-weight: bold;
-        color: #0066cc;
-    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -162,50 +151,7 @@ st.markdown("""
 st.markdown('<p class="main-header">🤖 AgenticAI Foundry</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-header">MIT Professional Education — Applied Generative AI for Digital Transformation</p>', unsafe_allow_html=True)
 
-st.markdown("""
-<div class="hero-box">
-    <h4 style="margin-top:0; color: #E8A838;">Hands-On Demos for Every Module</h4>
-    <p style="font-size: 1.05rem; margin-bottom: 0;">
-    This app contains interactive tools that bring course concepts to life — from token economics 
-    to multi-agent orchestration to protocol-level integration. Each demo connects directly to an 
-    assignment so you can <strong>learn by doing</strong>.
-    </p>
-</div>
-""", unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
-# STATS ROW
-# ─────────────────────────────────────────────
-
-modules_covered = sorted(set(d["module"] for d in DEMOS))
-module_str = ", ".join(str(m) for m in modules_covered)
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown(f"""
-    <div style="text-align: center; padding: 0.8rem; background: #f0f7ff; border-radius: 10px;">
-    <p class="stat-number">{len(DEMOS)}</p>
-    <p><strong>Interactive Demos</strong><br/>Hands-on tools you can run right now</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown(f"""
-    <div style="text-align: center; padding: 0.8rem; background: #f0f7ff; border-radius: 10px;">
-    <p class="stat-number">{len(modules_covered)}</p>
-    <p><strong>Modules Covered</strong><br/>Modules {module_str}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    no_key = sum(1 for d in DEMOS if d["api_required"] is False)
-    st.markdown(f"""
-    <div style="text-align: center; padding: 0.8rem; background: #f0f7ff; border-radius: 10px;">
-    <p class="stat-number">{no_key}</p>
-    <p><strong>No API Key Needed</strong><br/>Start exploring immediately</p>
-    </div>
-    """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # DEMO CARDS
