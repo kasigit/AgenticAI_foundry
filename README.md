@@ -156,9 +156,11 @@ pip install -r requirements-crewai.txt
 | Guide | Best For | What It Covers |
 |-------|----------|----------------|
 | **[Beginner's Guide](docs/BEGINNERS_GUIDE.md)** | Absolute beginners | Full explanations of every technology, step-by-step setup, glossary |
+| **[LLM Cost Guide](docs/LLM_COST_GUIDE.md)** | Module 1 | Token economics, model selection, cost drivers |
+| **[Multi-Agent Guide](docs/MULTI_AGENT_GUIDE.md)** | Module 2 | CrewAI vs LangChain, single-agent vs multi-agent patterns |
+| **[MCP Guide](docs/MCP_GUIDE.md)** | Module 3 | Understanding the Model Context Protocol |
 | **[CrewAI Setup](docs/CREWAI_SETUP.md)** | Quick reference | Commands, troubleshooting, CLI usage |
 | **[Docker Guide](docs/DOCKER_GUIDE.md)** | Container users | Docker-specific setup |
-| **[MCP Guide](docs/MCP_GUIDE.md)** | Module 3 | Understanding the Model Context Protocol |
 
 **New to AI agents?** Start with the [Beginner's Guide](docs/BEGINNERS_GUIDE.md) — it explains everything from scratch.
 
@@ -182,9 +184,11 @@ AgenticAI_foundry/
 │   └── crypto_agent.py            # Web search agent for crypto prices
 ├── docs/
 │   ├── BEGINNERS_GUIDE.md         # Comprehensive beginner tutorial
+│   ├── LLM_COST_GUIDE.md          # Module 1: Token economics & cost analysis
+│   ├── MULTI_AGENT_GUIDE.md       # Module 2: CrewAI vs LangChain patterns
+│   ├── MCP_GUIDE.md               # Module 3: Model Context Protocol
 │   ├── CREWAI_SETUP.md            # Quick setup reference
-│   ├── DOCKER_GUIDE.md            # Docker setup guide
-│   └── MCP_GUIDE.md               # MCP explainer for Module 3
+│   └── DOCKER_GUIDE.md            # Docker setup guide
 ├── Dockerfile
 ├── requirements.txt               # Base Streamlit dependencies
 ├── requirements-crewai.txt        # CrewAI + LangChain dependencies

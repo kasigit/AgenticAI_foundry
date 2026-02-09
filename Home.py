@@ -33,8 +33,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 1 — Analyze model pricing at scale",
         "api_required": False,
-        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/BEGINNERS_GUIDE.md",
-        "doc_label": "Beginner's Guide",
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/LLM_COST_GUIDE.md",
+        "doc_label": "LLM Cost Guide",
     },
     {
         "module": 2,
@@ -50,8 +50,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 2 — Observe agent collaboration and telemetry",
         "api_required": "Optional (works with free Ollama)",
-        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/CREWAI_SETUP.md",
-        "doc_label": "CrewAI Setup Guide",
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/MULTI_AGENT_GUIDE.md",
+        "doc_label": "Multi-Agent Guide",
     },
     {
         "module": 2,
@@ -67,8 +67,8 @@ DEMOS = [
         ],
         "assignment": "Assignment 2 — Compare single-agent vs multi-agent patterns",
         "api_required": "Optional (works with free Ollama)",
-        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/BEGINNERS_GUIDE.md",
-        "doc_label": "Beginner's Guide",
+        "doc_url": "https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/MULTI_AGENT_GUIDE.md",
+        "doc_label": "Multi-Agent Guide",
     },
     {
         "module": 3,
