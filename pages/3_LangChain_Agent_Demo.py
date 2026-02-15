@@ -141,10 +141,17 @@ def main():
                     os.environ["OPENAI_API_KEY"] = api_key
                     st.success("✅ API key set for this session")
         else:
+            from crews.research_crew import get_ollama_models
+            available_models = get_ollama_models()
+            default_idx = 0
+            if "llama3.2" in available_models:
+                default_idx = available_models.index("llama3.2")
+
             model = st.selectbox(
                 "Model",
-                ["llama3.2", "llama3.1", "mistral", "phi3"],
-                index=0
+                available_models,
+                index=default_idx,
+                help="Models detected from your local Ollama installation"
             )
             
             # Check Ollama
