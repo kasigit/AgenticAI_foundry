@@ -325,15 +325,13 @@ def get_ollama_models() -> list:
         req = urllib.request.Request(f"{OLLAMA_HOST}/api/tags")
         with urllib.request.urlopen(req, timeout=3) as response:
             data = json.loads(response.read().decode())
-            models = []
+            models = set()
             for m in data.get("models", []):
                 name = m.get("name", "")
                 if name:
-                    models.append(name)
-                    short_name = name.split(":")[0]
-                    if short_name != name and short_name not in models:
-                        models.append(short_name)
-            return sorted(set(models))
+                    # Only keep the short name (strip :latest or other tags)
+                    models.add(name.split(":")[0])
+            return sorted(models)
     except Exception:
         return ["llama3.2", "llama3.1", "mistral", "phi3", "gemma2"]
 
