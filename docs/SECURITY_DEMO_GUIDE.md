@@ -1,6 +1,6 @@
 # Agent Security Demo Guide 🛡️
 
-**MIT Professional Education: Agentic AI — Module 3**
+**MIT Professional Education: Agentic AI — Module 4**
 
 *A hands-on guide to understanding AI agent vulnerabilities and defenses*
 
@@ -268,6 +268,6 @@ User → Agent (drafts response) → Reviewer (checks for violations) → User
 
 <p align="center">
   <b>MIT Professional Education | Agentic AI Course</b><br>
-  <i>Module 3: Agent Security & Guardrails</i><br><br>
+  <i>Module 4: Agent Security & Guardrails</i><br><br>
   Questions? Check the <a href="DOCKER_GUIDE.md">Docker Guide</a> for setup or ask in class!
 </p>

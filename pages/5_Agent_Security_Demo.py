@@ -756,7 +756,8 @@ def _render_live_attack():
         ]
         for a in quick:
             if st.button(a[:55] + "…", key=f"qa_{hash(a)}", use_container_width=True):
-                st.session_state.live_attack_input = a
+                st.session_state.live_attack_text = a
+                st.rerun()
 
     with col_chat:
         st.markdown("**💬 Your Attack Prompt:**")
@@ -1268,7 +1269,7 @@ The agent has rules: protect customer data, limit refund authority, and stay in 
     st.divider()
     st.markdown("""
     <div style="text-align: center; color: #666; font-size: 0.9em;">
-        <strong>Agent Security Demo</strong> | Part of AgenticAI Foundry | Module 3: Agent Security & Guardrails<br>
+        <strong>Agent Security Demo</strong> | Part of AgenticAI Foundry | Module 4: Agent Security & Guardrails<br>
         Demo Mode: no API key required | Live Mode: OpenAI, Anthropic, or Ollama
     </div>
     """, unsafe_allow_html=True)

@@ -20,7 +20,7 @@
 10. [Troubleshooting for Beginners](#troubleshooting-for-beginners)
 11. [Glossary](#glossary)
 12. [Further Reading & Resources](#further-reading--resources)
-13. [The Agent Security Demo (Module 3)](#the-agent-security-demo-module-3)
+13. [The Agent Security Demo (Module 4)](#the-agent-security-demo-module-4)
 14. [All Five Demos at a Glance](#all-five-demos-at-a-glance)
 
 ---
@@ -1039,7 +1039,7 @@ Final Answer: Bitcoin is currently trading at $97,245.
 
 ---
 
-## The Agent Security Demo (Module 3)
+## The Agent Security Demo (Module 4)
 
 The fifth page in the toolkit focuses on **AI agent security** — specifically, how agents can be attacked through prompt injection and how to defend against those attacks.
 

@@ -88,7 +88,7 @@ DEMOS = [
         "doc_label": "MCP Guide",
     },
     {
-        "module": 3,
+        "module": 4,
         "icon": "🛡️",
         "title": "Agent Security Demo",
         "page": "Agent Security Demo",
@@ -222,7 +222,8 @@ st.info("""
 
 - **Module 1?** Start with the **LLM Cost Explorer** — no setup needed.
 - **Module 2?** Try the **Multi-Agent Demo** with Ollama (free) or OpenAI.
-- **Module 3?** Walk through the **MCP Explorer** and **Agent Security Demo** — Demo Mode needs no setup.
+- **Module 3?** Walk through the **MCP Explorer** — Demo Mode needs no setup.
+- **Module 4?** Try the **Agent Security Demo** — Demo Mode needs no setup.
 """)
 
 # ─────────────────────────────────────────────
@@ -237,7 +238,7 @@ with st.expander("📚 Documentation & Setup Guides"):
 | **[CrewAI Setup](https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/CREWAI_SETUP.md)** | Quick reference | Commands, troubleshooting, CLI usage |
 | **[Docker Guide](https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/DOCKER_GUIDE.md)** | Container users | Docker-specific setup and troubleshooting |
 | **[MCP Guide](https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/MCP_GUIDE.md)** | Module 3 | Understanding the Model Context Protocol |
-| **[Security Demo Guide](https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/SECURITY_DEMO_GUIDE.md)** | Module 3 | Prompt injection attacks, guardrails, business case |
+| **[Security Demo Guide](https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/SECURITY_DEMO_GUIDE.md)** | Module 4 | Prompt injection attacks, guardrails, business case |
 
 **New to all of this?** Start with the [Beginner's Guide](https://github.com/dlwhyte/AgenticAI_foundry/blob/main/docs/BEGINNERS_GUIDE.md) — it explains everything from scratch.
     """)

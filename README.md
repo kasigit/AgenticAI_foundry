@@ -18,7 +18,7 @@
 | **🤖 Multi-Agent Demo** | Module 2 | Watch three AI agents collaborate (CrewAI) | Optional |
 | **🔗 LangChain Agent Demo** | Module 2 | Single agent with web search tool (LangChain) | Optional |
 | **🔌 MCP Explorer** | Module 3 | Understand the Model Context Protocol — how AI agents connect to tools | No |
-| **🛡️ Agent Security Demo** | Module 3 | Prompt injection attacks & defense-in-depth guardrails | Demo: No / Live: Optional |
+| **🛡️ Agent Security Demo** | Module 4 | Prompt injection attacks & defense-in-depth guardrails | Demo: No / Live: Optional |
 
 > More demos will be added as the course progresses.
 
@@ -101,7 +101,7 @@ streamlit run Home.py
 **Assignment:** Supports Q3 (integration), Q4 (safety), and the overall proposal design.
 No API key required — this is an educational simulation tool.
 
-### 🛡️ Agent Security Demo (Module 3)
+### 🛡️ Agent Security Demo (Module 4)
 
 > No single guardrail catches every attack — AI security requires **defense in depth**.
 
@@ -179,7 +179,7 @@ pip install -r requirements-crewai.txt
 | **[LLM Cost Guide](docs/LLM_COST_GUIDE.md)** | Module 1 | Token economics, model selection, cost drivers |
 | **[Multi-Agent Guide](docs/MULTI_AGENT_GUIDE.md)** | Module 2 | CrewAI vs LangChain, single-agent vs multi-agent patterns |
 | **[MCP Guide](docs/MCP_GUIDE.md)** | Module 3 | Understanding the Model Context Protocol |
-| **[Security Demo Guide](docs/SECURITY_DEMO_GUIDE.md)** | Module 3 | Prompt injection attacks, guardrails, business case |
+| **[Security Demo Guide](docs/SECURITY_DEMO_GUIDE.md)** | Module 4 | Prompt injection attacks, guardrails, business case |
 | **[CrewAI Setup](docs/CREWAI_SETUP.md)** | Quick reference | Commands, troubleshooting, CLI usage |
 | **[Docker Guide](docs/DOCKER_GUIDE.md)** | Container users | Docker-specific setup |
 
@@ -197,7 +197,7 @@ AgenticAI_foundry/
 │   ├── 2_Multi_Agent_Demo.py       # CrewAI multi-agent demo (Module 2)
 │   ├── 3_LangChain_Agent_Demo.py   # LangChain tool agent (Module 2)
 │   ├── 4_MCP_Explorer.py           # MCP protocol explorer (Module 3)
-│   └── 5_Agent_Security_Demo.py    # Prompt injection & guardrails (Module 3)
+│   └── 5_Agent_Security_Demo.py    # Prompt injection & guardrails (Module 4)
 ├── crews/                          # 🧠 CrewAI multi-agent logic
 │   ├── __init__.py
 │   └── research_crew.py            # Agent definitions & orchestration
@@ -209,7 +209,7 @@ AgenticAI_foundry/
 │   ├── LLM_COST_GUIDE.md           # Module 1: Token economics & cost analysis
 │   ├── MULTI_AGENT_GUIDE.md        # Module 2: CrewAI vs LangChain patterns
 │   ├── MCP_GUIDE.md                # Module 3: Model Context Protocol
-│   ├── SECURITY_DEMO_GUIDE.md      # Module 3: Prompt injection & guardrails
+│   ├── SECURITY_DEMO_GUIDE.md      # Module 4: Prompt injection & guardrails
 │   ├── CREWAI_SETUP.md             # Quick setup reference
 │   └── DOCKER_GUIDE.md             # Docker setup guide
 ├── Dockerfile
@@ -257,15 +257,17 @@ Agent(
 
 CrewAI combines these attributes with task instructions to construct prompts sent to the LLM. See `crews/research_crew.py` for the full implementation.
 
-### Module 3: Agent Security & Integration
+### Module 3: Agent Integration
 
-> MCP is **USB-C for AI** — and guardrails are the **safety net underneath**.
+> MCP is **USB-C for AI** — one standard protocol connecting agents to any tool.
 
-Two demos cover Module 3:
+The MCP Explorer demo covers Module 3: how agents connect to tools via a standardized protocol. Compares MCP vs. Zapier vs. custom APIs across real scenarios (calendar scheduling, CRM lookup, DevOps triage).
 
-**MCP Explorer** — How agents connect to tools via a standardized protocol. Compares MCP vs. Zapier vs. custom APIs across real scenarios (calendar scheduling, CRM lookup, DevOps triage).
+### Module 4: Agent Security
 
-**Agent Security Demo** — How agents can be attacked via prompt injection and how to defend them with layered guardrails. Covers six attack types, five defense layers, and the business case for investing in AI security.
+> No single guardrail catches every attack — AI security requires **defense in depth**.
+
+The Agent Security Demo covers Module 4: how agents can be attacked via prompt injection and how to defend them with layered guardrails. Covers six attack types, five defense layers, and the business case for investing in AI security.
 
 #### MCP vs Other Approaches
 
