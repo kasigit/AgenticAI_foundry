@@ -564,11 +564,29 @@ def _render_live_attack():
         if provider_key == "openai":
             model = st.selectbox("Model", ["gpt-4o-mini", "gpt-4o"], key="atk_model")
             if not os.environ.get("OPENAI_API_KEY"):
-                api_key = st.text_input("API Key:", type="password", key="atk_key")
+                st.warning("⚠️ OPENAI_API_KEY not set")
+            api_key = st.text_input(
+                "OpenAI API Key:",
+                type="password",
+                value=os.getenv("OPENAI_API_KEY", ""),
+                key="atk_key",
+                help="Enter your OpenAI API key or set OPENAI_API_KEY environment variable",
+            )
+            if api_key:
+                os.environ["OPENAI_API_KEY"] = api_key
         elif provider_key == "anthropic":
             model = st.selectbox("Model", ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"], key="atk_model_ant")
             if not os.environ.get("ANTHROPIC_API_KEY"):
-                api_key = st.text_input("API Key:", type="password", key="atk_key_ant")
+                st.warning("⚠️ ANTHROPIC_API_KEY not set")
+            api_key = st.text_input(
+                "Anthropic API Key:",
+                type="password",
+                value=os.getenv("ANTHROPIC_API_KEY", ""),
+                key="atk_key_ant",
+                help="Enter your Anthropic API key or set ANTHROPIC_API_KEY environment variable",
+            )
+            if api_key:
+                os.environ["ANTHROPIC_API_KEY"] = api_key
         else:
             available = get_ollama_models()
             model = st.selectbox("Model", available, key="atk_model_oll")
