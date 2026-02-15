@@ -89,14 +89,26 @@ Six pre-built scenarios, each showing the attack prompt and side-by-side results
 
 Each scenario includes a guardrail analysis showing which defense layers would catch it and a real-world example of where similar attacks have occurred in production.
 
-### Live Mode (Requires API Key)
+### Live Mode (Interactive Testing)
 
-Send your own prompts to a real LLM and toggle guardrails on/off to see the difference:
+Live Mode lets you type your own attack prompts and toggle guardrails on/off in real time. How it works depends on your provider:
 
-- Start with **no guardrails** to see unprotected behavior
+**Frontier models (OpenAI / Anthropic):**
+- **Guardrails OFF** → A *simulated vulnerable response* shows what a misconfigured or non-safety-trained model would do. This is transparently labeled — frontier models like GPT-4o have built-in safety training that resists most prompt injection even without our guardrails.
+- **Guardrails ON** → Your prompt goes to the *real LLM* with the hardened system prompt, and the guardrails intercept as needed.
+
+**Open-source models (Ollama — Llama, Mistral, etc.):**
+- **Guardrails OFF** → *Real LLM call* with a vulnerable system prompt (data but no safety rules). Local models have less built-in safety, so attacks often succeed.
+- **Guardrails ON** → *Real LLM call* with the hardened system prompt, plus the guardrails intercept.
+
+This design teaches an important lesson: **don't rely on your model being smart — build guardrails that work independently.** Model choice itself is a security decision.
+
+**Tips:**
+- Start with guardrails OFF to see the vulnerability
 - Enable guardrails **one at a time** to see which layer catches each attack
-- Try **rephrasing attacks** to bypass input filters — it's harder than you think!
+- Try **rephrasing attacks** to bypass input filters — creative phrasing can slip through!
 - Enable **Constitutional Review** for the strongest protection (notice the added latency and cost)
+- Try the same attack on **Ollama vs OpenAI** to see how model robustness varies
 
 ---
 
@@ -177,14 +189,16 @@ Common thread: routine change + no guardrails = catastrophic failure.
 1. Get an API key from [console.anthropic.com](https://console.anthropic.com)
 2. Select **Anthropic**, choose model, enter key
 
-### Ollama (Free, Local)
+### Ollama (Free, Local — Best for Seeing Real Attacks)
 
 ```bash
 ollama pull llama3.2
 ollama serve
 ```
 
-Then select **Ollama (Local)** in the demo. Local models may be *more* susceptible to injection, which actually makes the demo more interesting.
+Then select **Ollama (Local)** in the demo. Local models have less built-in safety training, making them more susceptible to prompt injection. With Ollama, **all responses are real LLM calls** — you can see actual breaches happen live, then toggle guardrails on to stop them. This makes Ollama the most dramatic and educational provider for this demo.
+
+> **Why this matters:** In production, many organizations deploy fine-tuned or open-source models for cost and privacy reasons. These models may not have the same safety training as GPT-4o or Claude — making guardrails essential rather than optional.
 
 ---
 

@@ -1101,7 +1101,9 @@ User sees safe response
 ### Demo Mode vs. Live Mode
 
 - **Demo Mode** — Pre-built attack scenarios with simulated responses. No API key needed. Great for understanding the concepts quickly.
-- **Live Mode** — Your prompts go to a real LLM (OpenAI, Anthropic, or Ollama). You can toggle guardrails on/off and see the actual difference in real time.
+- **Live Mode** — Interactive testing with real guardrails. How it works depends on your provider:
+  - **Frontier models (OpenAI/Anthropic):** When guardrails are OFF, you see a *simulated vulnerable response* showing what a misconfigured agent would do (transparently labeled). Frontier models have built-in safety that resists most attacks. When guardrails are ON, the real LLM processes your prompt with active defenses.
+  - **Open-source models (Ollama):** All responses are *real LLM calls*. Local models have less safety training, so attacks often succeed — making this the most dramatic option for seeing real breaches live.
 
 ### For More Details
 

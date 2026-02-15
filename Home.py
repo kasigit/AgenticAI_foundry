@@ -96,7 +96,7 @@ DEMOS = [
         "learns": [
             "Six prompt injection attack types (direct, role-play, indirect, escalation)",
             "Five defense layers: input filters → constitutional AI → human-in-the-loop",
-            "Toggle guardrails on/off and see what gets caught in real time",
+            "Live Mode: real attacks on Ollama; simulated breaches for frontier models (transparent)",
             "Business case: breach costs vs. guardrail ROI by industry",
         ],
         "assignment": "Assignment 3 — Q4: Safety measures, Q5: Rollout, Q6: Risks",

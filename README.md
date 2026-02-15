@@ -113,7 +113,11 @@ No API key required — this is an educational simulation tool.
 
 **Two modes:**
 - **Demo Mode** — Pre-built scenarios, no API key needed
-- **Live Mode** — Send real prompts to OpenAI, Anthropic, or Ollama with guardrails you control
+- **Live Mode** — Interactive testing with real guardrails
+  - *Frontier models (OpenAI/Anthropic):* Simulated vulnerable responses when guardrails are OFF (transparently labeled); real LLM + guardrails when ON
+  - *Open-source models (Ollama):* Real LLM calls in both modes — local models are more susceptible to injection, so attacks often succeed live
+
+**Key insight:** Don't rely on your model being smart — build guardrails that work independently.
 
 **Assignment:** Supports Q4 (safety & guardrails), Q5 (rollout), Q6 (risks & mitigation).
 
