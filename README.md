@@ -27,9 +27,9 @@
 | 🤖 **Multi-Agent Demo** | Module 2 | How three AI agents collaborate like a team (CrewAI) | Optional |
 | 🔗 **LangChain Agent Demo** | Module 2 | How a single agent uses tools to answer questions in real time | Optional |
 | 🔌 **MCP Explorer** | Module 3 | How AI agents connect to external tools (calendars, CRMs, databases) | No |
-| 🛡️ **Agent Security Demo** | Module 5 | Prompt injection attacks and defense-in-depth guardrails | Demo: No / Live: Optional |
+| 🛡️ **Agent Security Demo** | Module 4 | Prompt injection attacks and defense-in-depth guardrails | Demo: No / Live: Optional |
 
-> Modules 1, 3, and 5 (Demo Mode) work immediately — no account, no API key required.
+> Modules 1, 3, and 4 (Demo Mode) work immediately — no account, no API key required.
 > Module 2 demos need either Ollama (free, local) or an OpenAI API key.
 
 ---
@@ -287,7 +287,7 @@ AgenticAI_foundry/
 │   ├── 2_Multi_Agent_Demo.py       # Module 2: CrewAI multi-agent
 │   ├── 3_LangChain_Agent_Demo.py   # Module 2: LangChain single agent
 │   ├── 4_MCP_Explorer.py           # Module 3: MCP protocol
-│   └── 5_Agent_Security_Demo.py    # Module 5: Prompt injection & guardrails
+│   └── 5_Agent_Security_Demo.py    # Module 4: Prompt injection & guardrails
 ├── crews/                           # Multi-agent logic (CrewAI)
 ├── agents/                          # Single-agent logic (LangChain)
 ├── docs/                            # All guides and documentation

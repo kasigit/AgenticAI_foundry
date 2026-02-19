@@ -168,7 +168,7 @@ col5, col6 = st.columns(2)
 with col5:
     st.markdown("""
     <div class="module-card">
-        <h4>🛡️ Module 5 · Agent Security Demo</h4>
+        <h4>🛡️ Module 4 · Agent Security Demo</h4>
         <p>Explore prompt injection attacks and defense mechanisms hands-on. Launch real attacks
         against a customer service agent, then watch guardrails intercept them in real time.
         Understand why AI security is a business-critical concern.</p>
