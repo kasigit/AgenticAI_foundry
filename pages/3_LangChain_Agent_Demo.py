@@ -15,8 +15,50 @@ import streamlit as st
 import sys
 import os
 
+st.set_page_config(
+    page_title="LangChain Agent Demo",
+    page_icon="🔗",
+    layout="wide"
+)
+
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Friendly dependency check
+_missing = []
+try:
+    import langchain_community
+except ImportError:
+    _missing.append("langchain-community")
+try:
+    import langchain_openai
+except ImportError:
+    _missing.append("langchain-openai")
+
+if _missing:
+    st.error("⚠️ Missing required libraries: " + ", ".join(_missing))
+    st.markdown("""
+    ### Setup Required
+
+    The LangChain Agent Demo needs additional libraries installed.
+    Open your terminal, navigate to the project folder, and run:
+
+    ```
+    pip3 install -r requirements-crewai.txt
+    ```
+
+    Then stop the app with **Ctrl + C** and restart it:
+
+    ```
+    python3 -m streamlit run Home.py
+    ```
+
+    If you're using Docker, try rebuilding:
+    ```
+    docker build -t agenticai-foundry .
+    ```
+    """)
+    st.stop()
 
 from agents.crypto_agent import run_crypto_agent, AgentTelemetry
 
@@ -84,7 +126,7 @@ def main():
     st.markdown("**Single agent with web search tool** - Get real-time crypto prices")
     
     # Explanation
-    with st.expander("ℹ️ How This Works", expanded=False):
+    with st.expander("ℹï¸ How This Works", expanded=False):
         st.markdown("""
         ### LangChain vs CrewAI
         
@@ -114,7 +156,7 @@ def main():
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.subheader("⚙️ Configuration")
+        st.subheader("⚙ï¸ Configuration")
         
         # Provider selection
         provider = st.radio(
@@ -135,28 +177,21 @@ def main():
             
             # Check API key
             if not check_openai_key():
-                st.warning("⚠️ OPENAI_API_KEY not set")
+                st.warning("⚠ï¸ OPENAI_API_KEY not set")
                 api_key = st.text_input("Enter API Key:", type="password")
                 if api_key:
                     os.environ["OPENAI_API_KEY"] = api_key
                     st.success("✅ API key set for this session")
         else:
-            from crews.research_crew import get_ollama_models
-            available_models = get_ollama_models()
-            default_idx = 0
-            if "llama3.2" in available_models:
-                default_idx = available_models.index("llama3.2")
-
             model = st.selectbox(
                 "Model",
-                available_models,
-                index=default_idx,
-                help="Models detected from your local Ollama installation"
+                ["llama3.2", "llama3.1", "mistral", "phi3"],
+                index=0
             )
             
             # Check Ollama
             if not check_ollama_running():
-                st.warning("⚠️ Ollama not detected. Make sure it's running.")
+                st.warning("⚠ï¸ Ollama not detected. Make sure it's running.")
     
     with col2:
         st.subheader("💬 Query")
@@ -236,7 +271,7 @@ def main():
             render_telemetry(result.telemetry)
             
         else:
-            st.error(f"❌ Error: {result.error}")
+            st.error(f"âŒ Error: {result.error}")
             
             # Troubleshooting
             with st.expander("🔧 Troubleshooting"):

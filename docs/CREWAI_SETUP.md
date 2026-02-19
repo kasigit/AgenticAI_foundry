@@ -22,9 +22,9 @@ The Multi-Agent Demo showcases three AI agents collaborating on a research task:
 
 | Agent | Role | What They Do |
 |-------|------|--------------|
-| 🔍 **Researcher** | Research Analyst | Gathers facts, statistics, and insights |
-| ✍️ **Writer** | Content Writer | Transforms research into clear prose |
-| 📝 **Editor** | Editor | Polishes for clarity and accuracy |
+| ðŸ” **Researcher** | Research Analyst | Gathers facts, statistics, and insights |
+| âœï¸ **Writer** | Content Writer | Transforms research into clear prose |
+| ðŸ“ **Editor** | Editor | Polishes for clarity and accuracy |
 
 You can run this with:
 - **Ollama** — Free, runs entirely on your machine, no API key needed

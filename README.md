@@ -5,185 +5,275 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **MIT Professional Education: Applied Generative AI for Digital Transformation**
+*Interactive demos for understanding AI economics, multi-agent systems, and agent integration*
 
-*Interactive demos for understanding AI economics, multi-agent systems, agent integration, and AI security*
+---
+
+## 📥 New Here? Start With This
+
+> **[⬇️ Download the Student Quick Start Guide (PDF)](docs/Student_Quick_Start.pdf)**
+>
+> The Quick Start Guide walks you through everything with screenshots — how to get the code,
+> which setup path to choose, and what you should see when it's working.
+> **Download this before doing anything else.**
 
 ---
 
 ## 🎯 What's Included
 
-| Demo | Module | Description | API Key? |
-|------|--------|-------------|----------|
-| **💰 LLM Cost Explorer** | Module 1 | Calculate and compare LLM API costs across providers | No |
-| **🤖 Multi-Agent Demo** | Module 2 | Watch three AI agents collaborate (CrewAI) | Optional |
-| **🔗 LangChain Agent Demo** | Module 2 | Single agent with web search tool (LangChain) | Optional |
-| **🔌 MCP Explorer** | Module 3 | Understand the Model Context Protocol — how AI agents connect to tools | No |
-| **🛡️ Agent Security Demo** | Module 4 | Prompt injection attacks & defense-in-depth guardrails | Demo: No / Live: Optional |
+| Demo | Module | What You'll Learn | API Key Needed? |
+|------|--------|-------------------|-----------------|
+| 💰 **LLM Cost Explorer** | Module 1 | Why the same AI task can cost $1 or $230 depending on model choice | No |
+| 🤖 **Multi-Agent Demo** | Module 2 | How three AI agents collaborate like a team (CrewAI) | Optional |
+| 🔗 **LangChain Agent Demo** | Module 2 | How a single agent uses tools to answer questions in real time | Optional |
+| 🔌 **MCP Explorer** | Module 3 | How AI agents connect to external tools (calendars, CRMs, databases) | No |
+| 🛡️ **Agent Security Demo** | Module 5 | Prompt injection attacks and defense-in-depth guardrails | Demo: No / Live: Optional |
 
-> More demos will be added as the course progresses.
+> Modules 1, 3, and 5 (Demo Mode) work immediately — no account, no API key required.
+> Module 2 demos need either Ollama (free, local) or an OpenAI API key.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Getting Started — Choose Your Path
 
-### Option 1: Docker (Recommended)
+**Not sure which path to take? Ask yourself one question:**
+
+> *"Have I used Docker before, or am I comfortable installing a new application from a website?"*
+
+- **Yes →** Take [Path A: Docker](#path-a-docker-recommended) — more reliable, fewer things can go wrong once running
+- **No →** Take [Path B: Python](#path-b-python) — more familiar territory if you've used Python before
+
+Both paths give you the full app. Docker is recommended because it handles all the dependencies for you.
+
+---
+
+### Step 0 — Get the Code (Both Paths)
+
+You need a copy of this repository on your computer before doing anything else.
+
+**Option 1: Download ZIP (easiest — no GitHub account needed)**
+
+1. Click the green **`< > Code`** button at the top of this page
+2. Click **"Download ZIP"**
+3. Find the downloaded file (usually in your Downloads folder)
+4. Right-click → **Extract All** (Windows) or double-click (Mac) to unzip it
+5. Remember where you saved the folder — you'll need it in the next steps
+
+**Option 2: Clone with Git (if you have Git installed)**
 
 ```bash
-# Clone the repository
 git clone https://github.com/dlwhyte/AgenticAI_foundry.git
-cd AgenticAI_foundry
+```
 
-# Build and run
+---
+
+### Path A: Docker (Recommended)
+
+Docker packages the entire app — Python, all libraries, everything — into a self-contained box.
+Once installed, it runs identically on Windows, Mac, and Linux with no dependency conflicts.
+
+**What is Docker?** Think of it like a shipping container for software. Everything the app needs
+is packed inside. You don't need to install Python or any libraries separately.
+
+**Time required:** ~20 minutes first time (mostly waiting for downloads). Under 1 minute after that.
+
+#### Step 1 — Install Docker Desktop
+
+- **Windows or Mac:** Download from [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) and run the installer
+- **Linux:** See `docs/DOCKER_GUIDE.md` for Linux-specific instructions
+
+After installing, open **Docker Desktop** and wait for it to fully start (you'll see a whale icon in your taskbar/menu bar stop animating).
+
+> ✅ You'll know Docker is ready when the whale icon is still (not animating).
+
+#### Step 2 — Open a Terminal
+
+| System | How to open a terminal |
+|--------|----------------------|
+| **Windows** | Press `Win + R`, type `powershell`, press Enter |
+| **Mac** | Press `Cmd + Space`, type `Terminal`, press Enter |
+| **Linux** | Press `Ctrl + Alt + T` |
+
+#### Step 3 — Navigate to the Project Folder
+
+Type the following, replacing the path with where you saved the folder in Step 0:
+
+```bash
+# Windows example (adjust the path to match where you saved it)
+cd C:\Users\YourName\Downloads\AgenticAI_foundry
+
+# Mac/Linux example
+cd ~/Downloads/AgenticAI_foundry
+```
+
+> 💡 **Tip:** You can drag the folder onto the terminal window and it will paste the path for you.
+
+#### Step 4 — Build the App (one-time only)
+
+```bash
 docker build -t agenticai-foundry .
+```
+
+This downloads Python and all required libraries. It will take 2–5 minutes and show a lot of output — that's normal. Wait until you see:
+
+```
+Successfully built xxxxxxxxxx
+Successfully tagged agenticai-foundry:latest
+```
+
+#### Step 5 — Run the App
+
+```bash
 docker run -p 8501:8501 agenticai-foundry
 ```
 
-Open [http://localhost:8501](http://localhost:8501)
+You'll see output ending with something like:
 
-### Option 2: Python
-
-```bash
-# Clone and install
-git clone https://github.com/dlwhyte/AgenticAI_foundry.git
-cd AgenticAI_foundry
-pip install -r requirements.txt
-
-# Run
-streamlit run Home.py
 ```
+You can now view your Streamlit app in your browser.
+URL: http://localhost:8501
+```
+
+#### Step 6 — Open in Your Browser
+
+Open your web browser and go to:
+
+**http://localhost:8501**
+
+🎉 You should see the AgenticAI Foundry home page!
+
+#### Step 7 — Stop the App
+
+When you're done, go back to the terminal and press **`Ctrl + C`**.
+
+#### Troubleshooting Docker
+
+| Problem | Solution |
+|---------|----------|
+| "Docker command not found" | Make sure Docker Desktop is open and running |
+| "Cannot connect to Docker daemon" | Open Docker Desktop and wait for the whale to stop animating |
+| "Port 8501 is already in use" | Run `docker run -p 8502:8501 agenticai-foundry` and open `http://localhost:8502` |
+| Build seems stuck | Wait — first build downloads ~500MB, can take 5+ minutes on slower connections |
+
+For more detailed Docker troubleshooting, see `docs/DOCKER_GUIDE.md`.
 
 ---
 
-## ✨ Demo Details
+### Path B: Python
 
-### 💰 LLM Cost Explorer (Module 1)
+Run the app directly using Python. You'll have more visibility into the code but there are more
+steps that can vary by operating system.
 
-> **The same AI transaction can cost between $1 and $230** — a 200x variance!
+**Time required:** ~15 minutes, more steps involved.
 
-- **Real-time Token Counter** — Uses OpenAI's tiktoken
-- **Multi-Model Comparison** — 10+ models from OpenAI, Anthropic, Google
-- **Scale Analysis** — See costs from 1K to 1M API calls
-- **Export Results** — CSV, JSON for assignments
+> ⚠️ **Check your Python version before starting.** Open a terminal and run:
+> ```
+> python3 --version
+> ```
+> If it shows **Python 3.9 or lower** — stop and use Docker (Path A) instead.
+> CrewAI (required for Module 2) only works on Python 3.10 or higher.
+> Modules 1 and 3 will still work on Python 3.9, but Module 2 will not.
 
-**Assignment:** Use this to analyze model pricing at scale for your write-up.
+#### Step 1 — Install Python 3.10 or Higher
 
-### 🤖 Multi-Agent Demo (Module 2)
+Check your version first:
 
-> Watch three agents collaborate: **Researcher → Writer → Editor**
+```bash
+python3 --version
+```
 
-- **Three Collaborating Agents** — Sequential task handoff via CrewAI
-- **Dual Provider Support** — Ollama (free, local) or OpenAI (paid, cloud)
-- **Live Agent Activity** — Watch agents hand off work in real-time
-- **CLI Support** — Run from command line or Streamlit
+- If you see `Python 3.10`, `3.11`, `3.12`, or `3.13` — skip to Step 2, you're ready
+- If you see `Python 3.9` or lower — download a newer version from [python.org/downloads](https://www.python.org/downloads/) and run the installer
 
-**Assignment:** Observe agent specialization, telemetry, and collaboration patterns.
+> ⚠️ **Windows users:** During installation, check the box that says **"Add Python to PATH"** — this is easy to miss and causes problems later if skipped.
+>
+> ⚠️ **Mac users:** Your Mac may have Python 3.9 built in (from Xcode). If so, download Python 3.11 from [python.org/downloads](https://www.python.org/downloads/) — it installs alongside the existing version without breaking anything.
 
-### 🔗 LangChain Agent Demo (Module 2)
+#### Step 2 — Open a Terminal and Navigate to the Project Folder
 
-> Single agent with tools: **Think → Search → Answer**
+See Step 2 and Step 3 from the Docker path above for how to open a terminal and navigate to the folder.
 
-- **Single Agent + Tools** — Contrast with CrewAI's multi-agent approach
-- **Real-Time Web Search** — Get current crypto prices via DuckDuckGo
-- **ReAct Pattern** — Watch the agent think, act, and observe
-- **Same Provider Options** — Works with Ollama or OpenAI
+#### Step 3 — Install the App's Dependencies
 
-**Assignment:** Compare single-agent vs multi-agent patterns.
+> ⚠️ **This step is required — do not skip it.** If you skip this, the app will crash with an error like `ModuleNotFoundError: No module named 'tiktoken'`.
 
-### 🔌 MCP Explorer (Module 3)
+Run both of these commands, one at a time:
 
-> MCP is **USB-C for AI** — one standard protocol connecting agents to any tool.
+```bash
+pip3 install -r requirements.txt
+pip3 install -r requirements-crewai.txt
+```
 
-- **Step-by-Step Scenarios** — Walk through real MCP interactions (calendar, Spotify, Salesforce, DevOps)
-- **Protocol Messages** — See the actual JSON-RPC requests and responses
-- **MCP vs Alternatives** — Side-by-side comparison with Zapier and custom APIs
-- **Integration Framework** — Understand when to use which approach
+This downloads all required Python libraries. It will take 2–5 minutes and show a lot of output — that's normal. Wait until you see your terminal prompt again before moving on.
 
-**Assignment:** Supports Q3 (integration), Q4 (safety), and the overall proposal design.
-No API key required — this is an educational simulation tool.
+> 💡 If `pip3` gives "command not found", try `pip install -r requirements.txt` instead.
 
-### 🛡️ Agent Security Demo (Module 4)
+#### Step 4 — Run the App
 
-> No single guardrail catches every attack — AI security requires **defense in depth**.
+```bash
+python3 -m streamlit run Home.py
+```
 
-- **Six Attack Scenarios** — Direct injection, role-playing (DAN), gradual escalation, system prompt extraction, policy bypass, indirect injection
-- **Five Defense Layers** — Input validation, scope enforcement, constitutional AI review, output filtering, human-in-the-loop
-- **Interactive Testing** — Toggle guardrails on/off, test them individually, see the coverage matrix
-- **Business Impact Calculator** — Breach costs vs. guardrail ROI by industry (Healthcare, Finance, Retail, Tech)
-- **Real-World Cases** — Knight Capital ($440M), Rogers outage, Optus outage
+Your browser should open automatically to `http://localhost:8501`.
+If it doesn't, open your browser and go there manually.
 
-**Two modes:**
-- **Demo Mode** — Pre-built scenarios, no API key needed
-- **Live Mode** — Interactive testing with real guardrails
-  - *Frontier models (OpenAI/Anthropic):* Simulated vulnerable responses when guardrails are OFF (transparently labeled); real LLM + guardrails when ON
-  - *Open-source models (Ollama):* Real LLM calls in both modes — local models are more susceptible to injection, so attacks often succeed live
+#### Step 5 — Stop the App
 
-**Key insight:** Don't rely on your model being smart — build guardrails that work independently.
+Press **`Ctrl + C`** in the terminal.
 
-**Assignment:** Supports Q4 (safety & guardrails), Q5 (rollout), Q6 (risks & mitigation).
+#### Troubleshooting Python
+
+| Problem | Solution |
+|---------|----------|
+| "pip not found" | Try `pip3 install -r requirements.txt` instead |
+| "streamlit not found" | Try `python -m streamlit run Home.py` |
+| "Permission denied" | Add `--user` to the pip command: `pip install --user -r requirements.txt` |
+| Browser doesn't open | Manually go to `http://localhost:8501` in your browser |
 
 ---
 
-## 🤖 Multi-Agent Demo Setup
+## 🤖 Setting Up the Agent Demos (Module 2)
 
-The Multi-Agent and LangChain demos need an AI "brain." You have two options:
+The LLM Cost Explorer (Module 1) and MCP Explorer (Module 3) work without any additional setup.
 
-### What is Ollama?
+For the **Multi-Agent Demo** and **LangChain Agent Demo**, the app needs an AI model to run.
+You have two options:
 
-**Ollama** lets you run powerful AI models **locally on your own computer** — for free, with no data leaving your machine.
+### Option A: Ollama — Free, Runs on Your Computer
 
-| Feature | Ollama (Local) | OpenAI (Cloud) |
-|---------|----------------|----------------|
-| **Cost** | Free | ~$0.01/run |
-| **Privacy** | Data stays local | Data sent to cloud |
-| **Speed** | Depends on your hardware | Consistently fast |
-| **Internet** | Not required | Required |
-| **Setup** | Install + download model | Just need API key |
+Ollama lets you run AI models locally. No account, no cost, no data leaving your machine.
 
-### Option A: Ollama (Free, Local) — Recommended for Learning
+| Step | Command |
+|------|---------|
+| 1. Install Ollama | Download from [ollama.ai](https://ollama.ai) |
+| 2. Download a model | `ollama pull llama3.2` (2GB download, one-time) |
+| 3. Start Ollama | `ollama serve` — keep this terminal open |
 
-```bash
-# 1. Install Ollama
-# macOS: brew install ollama
-# Linux: curl -fsSL https://ollama.ai/install.sh | sh
-# Windows: Download from https://ollama.ai
+Then run the app (Docker or Python path) and select **Ollama** in the demo settings.
 
-# 2. Download an AI model (2 GB, takes 2-5 min)
-ollama pull llama3.2
+> 💡 The model download is large (~2GB). Do this on a good internet connection.
 
-# 3. Start the Ollama server (keep this running)
-ollama serve
+### Option B: OpenAI — Paid, Faster Results
 
-# 4. Install Python dependencies (if running outside Docker)
-pip install -r requirements-crewai.txt
-```
+Costs approximately $0.01 per demo run. Requires creating an account at [platform.openai.com](https://platform.openai.com).
 
-### Option B: OpenAI (Paid, Cloud) — Faster Results
+Once you have an API key, enter it directly in the app's sidebar — no environment setup needed.
 
-```bash
-# 1. Get an API key from platform.openai.com
-
-# 2. Set it in your environment
-export OPENAI_API_KEY="sk-your-key-here"
-
-# 3. Install Python dependencies (if running outside Docker)
-pip install -r requirements-crewai.txt
-```
+For full setup instructions for both options, see `docs/CREWAI_SETUP.md`.
 
 ---
 
 ## 📚 Documentation
 
-| Guide | Best For | What It Covers |
-|-------|----------|----------------|
-| **[Beginner's Guide](docs/BEGINNERS_GUIDE.md)** | Absolute beginners | Full explanations of every technology, step-by-step setup, glossary |
-| **[LLM Cost Guide](docs/LLM_COST_GUIDE.md)** | Module 1 | Token economics, model selection, cost drivers |
-| **[Multi-Agent Guide](docs/MULTI_AGENT_GUIDE.md)** | Module 2 | CrewAI vs LangChain, single-agent vs multi-agent patterns |
-| **[MCP Guide](docs/MCP_GUIDE.md)** | Module 3 | Understanding the Model Context Protocol |
-| **[Security Demo Guide](docs/SECURITY_DEMO_GUIDE.md)** | Module 4 | Prompt injection attacks, guardrails, business case |
-| **[CrewAI Setup](docs/CREWAI_SETUP.md)** | Quick reference | Commands, troubleshooting, CLI usage |
-| **[Docker Guide](docs/DOCKER_GUIDE.md)** | Container users | Docker-specific setup |
-
-**New to AI agents?** Start with the [Beginner's Guide](docs/BEGINNERS_GUIDE.md) — it explains everything from scratch.
+| Guide | What It Covers |
+|-------|---------------|
+| [📥 Student Quick Start (PDF)](docs/Student_Quick_Start.pdf) | Screenshots walkthrough — start here if you're new |
+| [🐳 Docker Guide](docs/DOCKER_GUIDE.md) | Full Docker setup with troubleshooting |
+| [📖 Beginner's Guide](docs/BEGINNERS_GUIDE.md) | Deep explanation of all technologies used |
+| [💰 LLM Cost Guide](docs/LLM_COST_GUIDE.md) | Token economics and model pricing (Module 1) |
+| [🤖 Multi-Agent Guide](docs/MULTI_AGENT_GUIDE.md) | CrewAI vs LangChain patterns (Module 2) |
+| [🔌 MCP Guide](docs/MCP_GUIDE.md) | Model Context Protocol explained (Module 3) |
+| [⚙️ CrewAI Setup](docs/CREWAI_SETUP.md) | Ollama and OpenAI setup for agent demos |
 
 ---
 
@@ -191,148 +281,60 @@ pip install -r requirements-crewai.txt
 
 ```
 AgenticAI_foundry/
-├── Home.py                         # Landing page — course hub
+├── Home.py                          # Start here — the course hub
 ├── pages/
-│   ├── 1_LLM_Cost_Calculator.py    # Cost calculator (Module 1)
-│   ├── 2_Multi_Agent_Demo.py       # CrewAI multi-agent demo (Module 2)
-│   ├── 3_LangChain_Agent_Demo.py   # LangChain tool agent (Module 2)
-│   ├── 4_MCP_Explorer.py           # MCP protocol explorer (Module 3)
-│   └── 5_Agent_Security_Demo.py    # Prompt injection & guardrails (Module 4)
-├── crews/                          # 🧠 CrewAI multi-agent logic
-│   ├── __init__.py
-│   └── research_crew.py            # Agent definitions & orchestration
-├── agents/                         # 🔗 LangChain single-agent logic
-│   ├── __init__.py
-│   └── crypto_agent.py             # Web search agent for crypto prices
-├── docs/
-│   ├── BEGINNERS_GUIDE.md          # Comprehensive beginner tutorial
-│   ├── LLM_COST_GUIDE.md           # Module 1: Token economics & cost analysis
-│   ├── MULTI_AGENT_GUIDE.md        # Module 2: CrewAI vs LangChain patterns
-│   ├── MCP_GUIDE.md                # Module 3: Model Context Protocol
-│   ├── SECURITY_DEMO_GUIDE.md      # Module 4: Prompt injection & guardrails
-│   ├── CREWAI_SETUP.md             # Quick setup reference
-│   └── DOCKER_GUIDE.md             # Docker setup guide
+│   ├── 1_LLM_Cost_Calculator.py    # Module 1: Cost explorer
+│   ├── 2_Multi_Agent_Demo.py       # Module 2: CrewAI multi-agent
+│   ├── 3_LangChain_Agent_Demo.py   # Module 2: LangChain single agent
+│   ├── 4_MCP_Explorer.py           # Module 3: MCP protocol
+│   └── 5_Agent_Security_Demo.py    # Module 5: Prompt injection & guardrails
+├── crews/                           # Multi-agent logic (CrewAI)
+├── agents/                          # Single-agent logic (LangChain)
+├── docs/                            # All guides and documentation
+│   ├── Student_Quick_Start.pdf      # ← Start here if you're new
+│   ├── DOCKER_GUIDE.md
+│   ├── BEGINNERS_GUIDE.md
+│   └── ...
+├── setup_check.py                   # Run this to check your environment
 ├── Dockerfile
-├── requirements.txt                # Base Streamlit dependencies
-├── requirements-crewai.txt         # CrewAI + LangChain dependencies
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 📊 Module Connections
+## 🔍 Check Your Environment
 
-### Module 1: LLM Cost Explorer
-
-> **The same AI transaction can cost between $1 and $230** — a 200x variance!
-
-Use this tool to understand token economics and model pricing before scaling AI in your org.
-
-### Module 2: Multi-Agent Systems
-
-> Watch agents collaborate: **Researcher → Writer → Editor**
-
-See multi-agent orchestration (CrewAI) and single-agent reasoning (LangChain) side by side.
-
-#### CrewAI vs LangChain — Two Approaches
-
-| Aspect | CrewAI (Multi-Agent) | LangChain (Tool Agent) |
-|--------|---------------------|------------------------|
-| **Metaphor** | Team of employees | Single agent with tools |
-| **Pattern** | Sequential handoff | ReAct (Reason + Act) |
-| **Example** | Research → Write → Edit | Question → Search → Answer |
-| **Best For** | Complex workflows | Real-time data retrieval |
-
-#### How CrewAI Specializes Agents
-
-```python
-Agent(
-    role="Research Analyst",             # Job title
-    goal="Gather info about {topic}",    # What to achieve
-    backstory="You are an experienced    # Shapes behavior
-               researcher with expertise..."
-    llm=llm
-)
-```
-
-CrewAI combines these attributes with task instructions to construct prompts sent to the LLM. See `crews/research_crew.py` for the full implementation.
-
-### Module 3: Agent Integration
-
-> MCP is **USB-C for AI** — one standard protocol connecting agents to any tool.
-
-The MCP Explorer demo covers Module 3: how agents connect to tools via a standardized protocol. Compares MCP vs. Zapier vs. custom APIs across real scenarios (calendar scheduling, CRM lookup, DevOps triage).
-
-### Module 4: Agent Security
-
-> No single guardrail catches every attack — AI security requires **defense in depth**.
-
-The Agent Security Demo covers Module 4: how agents can be attacked via prompt injection and how to defend them with layered guardrails. Covers six attack types, five defense layers, and the business case for investing in AI security.
-
-#### MCP vs Other Approaches
-
-| Aspect | Zapier / n8n | Custom APIs | MCP |
-|--------|-------------|-------------|-----|
-| **Complexity** | Low (no-code) | High (custom dev) | Medium (standard) |
-| **AI Awareness** | None — trigger/action | Manual integration | Native AI support |
-| **Context / Memory** | No | Build it yourself | Built-in |
-| **Best For** | Simple automations | Unique business logic | AI agent ecosystems |
-
-#### Defense in Depth
-
-| Layer | What It Does | Cost | Catches |
-|-------|-------------|------|---------|
-| 🔍 Input Validation | Keyword/pattern scan of user input | ~5ms, free | Known attack patterns |
-| 🎯 Scope Enforcement | Whitelist of allowed agent actions | ~5ms, free | Privilege escalation |
-| 🧠 Constitutional Review | Second LLM reviews draft response | ~1–2s, 2× API cost | Subtle, creative attacks |
-| 🔒 Output Filtering | Scan response for PII/secrets | ~10ms, free | Data leaks |
-| 👤 Human-in-the-Loop | Human approves high-risk actions | Minutes | Financial/irreversible actions |
-
----
-
-## 🖥️ CLI Usage
-
-The Multi-Agent Demo also works from the command line:
+Not sure if everything is set up correctly? Run this from your terminal in the project folder:
 
 ```bash
-# With Ollama (free)
-python -m crews.research_crew --provider ollama --task "Research AI in healthcare"
-
-# With OpenAI
-python -m crews.research_crew --provider openai --task "Research AI in healthcare"
-
-# Check your setup
-python -m crews.research_crew --check
+python setup_check.py
 ```
 
----
-
-## 🛠️ Technologies
-
-| Technology | What It Does | Learn More |
-|------------|--------------|------------|
-| **[Streamlit](https://streamlit.io/)** | Web app framework | Creates the UI |
-| **[CrewAI](https://github.com/joaomdmoura/crewAI)** | Multi-agent orchestration | Coordinates agents |
-| **[Ollama](https://ollama.ai/)** | Local LLM runtime | Runs AI on your machine |
-| **[LangChain](https://langchain.com/)** | LLM integrations | Connects to AI providers |
-| **[Plotly](https://plotly.com/)** | Interactive charts | Visualizes cost data |
-| **[Docker](https://www.docker.com/)** | Containerization | Easy deployment |
+It will check Python, required libraries, Docker, Ollama, and API keys — and tell you in plain
+English what's working and what needs attention.
 
 ---
 
-## ❓ Troubleshooting
+## 🛠 Technologies Used
 
-### Quick Fixes
+| Technology | What It Does |
+|-----------|-------------|
+| [Streamlit](https://streamlit.io/) | Creates the web interface |
+| [CrewAI](https://github.com/joaomdmoura/crewAI) | Orchestrates multiple AI agents |
+| [LangChain](https://langchain.com/) | Connects to AI providers and tools |
+| [Ollama](https://ollama.ai/) | Runs AI models locally on your machine |
+| [Docker](https://www.docker.com/) | Packages the app for reliable deployment |
+| [Plotly](https://plotly.com/) | Interactive charts and visualizations |
 
-| Problem | Solution |
-|---------|----------|
-| "Ollama not running" | Run `ollama serve` in a terminal |
-| "Model not found" | Run `ollama pull llama3.2` |
-| "Out of memory" | Try smaller model: `ollama pull phi3` |
-| "Slow responses" | Normal for local AI; try OpenAI for speed |
-| "Import errors" | Run `pip install crewai langchain-community` |
+---
 
-For detailed troubleshooting, see [Beginner's Guide — Troubleshooting](docs/BEGINNERS_GUIDE.md#troubleshooting-for-beginners).
+## ❓ Getting Help
+
+- **Setup issues:** Run `python setup_check.py` and share the output
+- **Docker problems:** See `docs/DOCKER_GUIDE.md` troubleshooting section
+- **Agent demo issues:** See `docs/CREWAI_SETUP.md` troubleshooting section
+- **General questions:** Post in the course discussion forum with any error messages you see
 
 ---
 
@@ -342,7 +344,5 @@ MIT License — see [LICENSE](LICENSE)
 
 ---
 
-<p align="center">
-  <b>MIT Professional Education | Applied Generative AI for Digital Transformation</b><br>
-  <i>Demos work locally — API keys optional (Ollama mode)</i>
-</p>
+*MIT Professional Education | Applied Generative AI for Digital Transformation*
+*Modules 1, 3 & 5 (Demo Mode) work immediately with no API key · Module 2 requires Ollama or OpenAI*

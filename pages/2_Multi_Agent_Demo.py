@@ -16,8 +16,51 @@ import os
 import time
 from pathlib import Path
 
+st.set_page_config(
+    page_title="Multi-Agent Demo",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Friendly dependency check
+_missing = []
+try:
+    import crewai
+except ImportError:
+    _missing.append("crewai")
+try:
+    import langchain_community
+except ImportError:
+    _missing.append("langchain-community")
+
+if _missing:
+    st.error("⚠️ Missing required libraries: " + ", ".join(_missing))
+    st.markdown("""
+    ### Setup Required
+
+    The Multi-Agent Demo needs additional libraries installed.
+    Open your terminal, navigate to the project folder, and run:
+
+    ```
+    pip3 install -r requirements-crewai.txt
+    ```
+
+    Then stop the app with **Ctrl + C** and restart it:
+
+    ```
+    python3 -m streamlit run Home.py
+    ```
+
+    If you're using Docker, try rebuilding:
+    ```
+    docker build -t agenticai-foundry .
+    ```
+    """)
+    st.stop()
 
 # Import crew logic
 try:
@@ -26,25 +69,12 @@ try:
         get_available_providers,
         check_ollama_running,
         check_ollama_model,
-        get_ollama_models,
         PROVIDER_CONFIGS
     )
     CREW_AVAILABLE = True
 except ImportError as e:
     CREW_AVAILABLE = False
     IMPORT_ERROR = str(e)
-
-
-# =============================================================================
-# PAGE CONFIG
-# =============================================================================
-
-st.set_page_config(
-    page_title="Multi-Agent Demo",
-    page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Custom CSS
 st.markdown("""
@@ -235,7 +265,7 @@ if not available_providers:
 # =============================================================================
 
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("⚙ï¸ Configuration")
     
     # Provider selection
     provider_options = list(available_providers.keys())
@@ -255,32 +285,20 @@ with st.sidebar:
     if provider_choice == "ollama":
         # Check Ollama status
         ollama_running = check_ollama_running()
-
         if ollama_running:
             st.success("✅ Ollama is running")
-
-            # Dynamically get installed models
-            available_models = get_ollama_models()
-
-            if available_models:
-                default_idx = 0
-                if "llama3.2" in available_models:
-                    default_idx = available_models.index("llama3.2")
-
-                ollama_model = st.selectbox(
-                    "Model",
-                    options=available_models,
-                    index=default_idx,
-                    help="Models detected from your local Ollama installation"
-                )
-                st.caption(f"📦 {len(available_models)} model(s) installed")
+            if check_ollama_model():
+                st.caption("llama3.2 model ready")
             else:
-                st.warning("⚠️ No models found. Run: `ollama pull llama3.2`")
-                ollama_model = "llama3.2"
+                st.warning("⚠ï¸ llama3.2 not found. Run: `ollama pull llama3.2`")
         else:
-            st.error("❌ Ollama not running. Start with: `ollama serve`")
-            ollama_model = "llama3.2"
-
+            st.error("âŒ Ollama not running. Start with: `ollama serve`")
+        
+        ollama_model = st.selectbox(
+            "Model",
+            options=["llama3.2", "llama3.1", "mistral", "phi3", "gemma2"],
+            help="Select Ollama model"
+        )
         api_key = None
         
     elif provider_choice == "openai":
@@ -295,7 +313,7 @@ with st.sidebar:
             api_key = ""
             
         if not api_key:
-            st.warning("⚠️ API key required")
+            st.warning("⚠ï¸ API key required")
         
         openai_model = st.selectbox(
             "Model",
@@ -316,25 +334,25 @@ with st.sidebar:
 # =============================================================================
 
 # How it works
-with st.expander("ℹ️ How it works", expanded=False):
+with st.expander("ℹï¸ How it works", expanded=False):
     st.markdown("""
     This demo runs **three AI agents** that collaborate sequentially:
     
-    1. **🔍 Researcher** - Gathers facts, statistics, and key insights
-    2. **✍️ Writer** - Transforms research into clear, engaging prose  
-    3. **📝 Editor** - Polishes for clarity, accuracy, and professionalism
+    1. **ðŸ” Researcher** - Gathers facts, statistics, and key insights
+    2. **âœï¸ Writer** - Transforms research into clear, engaging prose  
+    3. **ðŸ“ Editor** - Polishes for clarity, accuracy, and professionalism
     
     Each agent passes their work to the next, similar to a real content team.
     
     **Telemetry tracked:**
-    - ⏱️ Duration per agent
+    - â±ï¸ Duration per agent
     - 🔢 Token counts (input/output)
     - 📞 API calls
     - 💰 Cost estimates
     """)
 
 # Topic input
-st.subheader("📝 Research Topic")
+st.subheader("ðŸ“ Research Topic")
 
 col1, col2 = st.columns([3, 1])
 
@@ -403,7 +421,7 @@ if run_button and can_run:
         researcher_card = st.empty()
         researcher_card.markdown("""
         <div class="agent-card agent-researcher">
-            <strong>🔍 Researcher</strong><br/>
+            <strong>ðŸ” Researcher</strong><br/>
             <span class="status-badge status-pending">Waiting...</span>
         </div>
         """, unsafe_allow_html=True)
@@ -412,7 +430,7 @@ if run_button and can_run:
         writer_card = st.empty()
         writer_card.markdown("""
         <div class="agent-card agent-writer">
-            <strong>✍️ Writer</strong><br/>
+            <strong>âœï¸ Writer</strong><br/>
             <span class="status-badge status-pending">Waiting...</span>
         </div>
         """, unsafe_allow_html=True)
@@ -421,7 +439,7 @@ if run_button and can_run:
         editor_card = st.empty()
         editor_card.markdown("""
         <div class="agent-card agent-editor">
-            <strong>📝 Editor</strong><br/>
+            <strong>ðŸ“ Editor</strong><br/>
             <span class="status-badge status-pending">Waiting...</span>
         </div>
         """, unsafe_allow_html=True)
@@ -448,11 +466,11 @@ if run_button and can_run:
         run_params["model"] = openai_model
     
     # Update UI to show running
-    status_text.text("🔍 Researcher is gathering information...")
+    status_text.text("ðŸ” Researcher is gathering information...")
     researcher_card.markdown("""
     <div class="agent-card agent-researcher">
-        <strong>🔍 Researcher</strong><br/>
-        <span class="status-badge status-running">Working... ⏳</span>
+        <strong>ðŸ” Researcher</strong><br/>
+        <span class="status-badge status-running">Working... â³</span>
     </div>
     """, unsafe_allow_html=True)
     progress_bar.progress(10)
@@ -475,9 +493,9 @@ if run_button and can_run:
         # Researcher complete
         researcher_card.markdown(f"""
         <div class="agent-card agent-researcher">
-            <strong>🔍 Researcher</strong>
+            <strong>ðŸ” Researcher</strong>
             <span class="status-badge status-done">Complete ✓</span><br/>
-            <span class="time-badge">⏱️ {format_duration(researcher_data.duration_seconds if researcher_data else 0)}</span>
+            <span class="time-badge">â±ï¸ {format_duration(researcher_data.duration_seconds if researcher_data else 0)}</span>
             <span class="token-badge">🔢 {format_tokens(researcher_data.total_tokens if researcher_data else 0)} tokens</span>
         </div>
         """, unsafe_allow_html=True)
@@ -486,9 +504,9 @@ if run_button and can_run:
         # Writer complete
         writer_card.markdown(f"""
         <div class="agent-card agent-writer">
-            <strong>✍️ Writer</strong>
+            <strong>âœï¸ Writer</strong>
             <span class="status-badge status-done">Complete ✓</span><br/>
-            <span class="time-badge">⏱️ {format_duration(writer_data.duration_seconds if writer_data else 0)}</span>
+            <span class="time-badge">â±ï¸ {format_duration(writer_data.duration_seconds if writer_data else 0)}</span>
             <span class="token-badge">🔢 {format_tokens(writer_data.total_tokens if writer_data else 0)} tokens</span>
         </div>
         """, unsafe_allow_html=True)
@@ -497,9 +515,9 @@ if run_button and can_run:
         # Editor complete
         editor_card.markdown(f"""
         <div class="agent-card agent-editor">
-            <strong>📝 Editor</strong>
+            <strong>ðŸ“ Editor</strong>
             <span class="status-badge status-done">Complete ✓</span><br/>
-            <span class="time-badge">⏱️ {format_duration(editor_data.duration_seconds if editor_data else 0)}</span>
+            <span class="time-badge">â±ï¸ {format_duration(editor_data.duration_seconds if editor_data else 0)}</span>
             <span class="token-badge">🔢 {format_tokens(editor_data.total_tokens if editor_data else 0)} tokens</span>
         </div>
         """, unsafe_allow_html=True)
@@ -536,13 +554,13 @@ if run_button and can_run:
         if show_agent_outputs and result.task_outputs:
             with st.expander("👥 Individual Agent Outputs", expanded=True):
                 for agent_name, output in result.task_outputs.items():
-                    icon = "🔍" if agent_name == "Researcher" else "✍️" if agent_name == "Writer" else "📝"
+                    icon = "ðŸ”" if agent_name == "Researcher" else "âœï¸" if agent_name == "Writer" else "ðŸ“"
                     agent_telem = next((a for a in telemetry.agents if a.agent_name == agent_name), None)
                     
                     st.markdown(f"**{icon} {agent_name}**")
                     if agent_telem:
                         cols = st.columns(4)
-                        cols[0].caption(f"⏱️ {format_duration(agent_telem.duration_seconds)}")
+                        cols[0].caption(f"â±ï¸ {format_duration(agent_telem.duration_seconds)}")
                         cols[1].caption(f"🔢 {agent_telem.total_tokens:,} tokens")
                         cols[2].caption(f"📥 {agent_telem.input_tokens:,} in")
                         cols[3].caption(f"📤 {agent_telem.output_tokens:,} out")
@@ -569,7 +587,7 @@ if run_button and can_run:
                 total_tokens = [a.total_tokens for a in telemetry.agents]
                 
                 # Duration chart
-                st.markdown("**⏱️ Duration by Agent (seconds)**")
+                st.markdown("**â±ï¸ Duration by Agent (seconds)**")
                 duration_data = {
                     "Agent": agent_names,
                     "Duration (s)": durations
@@ -667,7 +685,7 @@ if run_button and can_run:
     else:
         # Error
         progress_bar.progress(0)
-        status_text.text("❌ Error occurred")
+        status_text.text("âŒ Error occurred")
         st.error(f"**Error:** {result.error}")
 
 

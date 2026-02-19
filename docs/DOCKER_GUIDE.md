@@ -1,4 +1,4 @@
-# Docker Guide for Beginners 🐳
+# Docker Guide for Beginners ðŸ³
 
 This guide will help you install and use Docker to run the LLM Cost Explorer, even if you've never used Docker before.
 
@@ -128,9 +128,32 @@ You can create many containers from one image, just like you can bake many cakes
 
 ---
 
-## Part 3: Running the LLM Cost Explorer
+## Part 3: Running the AgenticAI Foundry
 
-### Step 1: Get the Code
+### Step 0: Get the Code — Start Here
+
+Before anything else, you need a copy of the files on your computer.
+
+**👉 Recommended: Download ZIP (no GitHub account or Git required)**
+
+1. Go to **https://github.com/dlwhyte/AgenticAI_foundry**
+2. Click the green **`< > Code`** button (top right of the file list)
+3. Click **"Download ZIP"**
+4. Find the downloaded file in your **Downloads** folder
+5. **Extract/unzip it:**
+   - **Windows:** Right-click the ZIP file → "Extract All" → click Extract
+   - **Mac:** Double-click the ZIP file — it extracts automatically
+6. You'll have a folder called `AgenticAI_foundry-main` — remember where it is!
+
+> 💡 **Tip:** Move the folder somewhere easy to find, like your Desktop or Documents folder.
+> You'll need to navigate to it in the terminal in the next steps.
+
+**Option B: Clone with Git** (only if you have Git installed)
+```bash
+git clone https://github.com/dlwhyte/AgenticAI_foundry.git
+```
+
+### Step 1: Get the Code (legacy heading — see Step 0 above)
 
 **Option A: Download ZIP**
 1. Go to https://github.com/dlwhyte/AgenticAI_foundry
@@ -331,7 +354,7 @@ docker system prune
 ## Quick Reference Card
 
 ```
-┌─────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────â”
 │                    DOCKER QUICK START                    │
 ├─────────────────────────────────────────────────────────┤
 │  1. Open terminal                                        │

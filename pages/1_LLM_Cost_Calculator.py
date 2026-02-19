@@ -5,18 +5,65 @@ Enhanced with additional visualizations
 """
 
 import streamlit as st
-import tiktoken
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import numpy as np
 
 st.set_page_config(
     page_title="LLM Cost Calculator",
     page_icon="📊",
     layout="wide"
 )
+
+# Friendly dependency check — shows a clear message instead of crashing
+_missing = []
+try:
+    import tiktoken
+except ImportError:
+    _missing.append("tiktoken")
+try:
+    import pandas as pd
+except ImportError:
+    _missing.append("pandas")
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+except ImportError:
+    _missing.append("plotly")
+try:
+    import numpy as np
+except ImportError:
+    _missing.append("numpy")
+
+if _missing:
+    st.error("⚠️ Missing required libraries: " + ", ".join(_missing))
+    st.markdown("""
+    ### Setup Required
+
+    You need to install the app's dependencies before running it.
+    Open your terminal, navigate to the project folder, and run:
+
+    ```
+    pip3 install -r requirements.txt
+    pip3 install -r requirements-crewai.txt
+    ```
+
+    Then stop the app with **Ctrl + C** and restart it:
+
+    ```
+    python3 -m streamlit run Home.py
+    ```
+
+    If you're using Docker, this should not happen — try rebuilding:
+    ```
+    docker build -t agenticai-foundry .
+    ```
+    """)
+    st.stop()
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import numpy as np
 
 # ============================================================================
 # PRICING DATA (Per Million Tokens) - Updated January 2025
@@ -120,7 +167,7 @@ This tool simulates what you would experience using the OpenAI API or similar se
 # SIDEBAR CONFIGURATION
 # ============================================================================
 
-st.sidebar.header("⚙️ Configuration")
+st.sidebar.header("⚙ï¸ Configuration")
 
 # Volume settings
 st.sidebar.subheader("📈 Scale Settings")
@@ -143,7 +190,7 @@ else:
 st.sidebar.metric("Monthly Calls", f"{num_calls:,}")
 
 # Filter options
-st.sidebar.subheader("🔍 Filter Models")
+st.sidebar.subheader("ðŸ” Filter Models")
 all_providers = list(set(p["provider"] for p in PRICING_DATA.values()))
 providers = st.sidebar.multiselect(
     "Providers",
@@ -174,7 +221,7 @@ with tab1:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📝 Input (Your Prompt)")
+        st.subheader("ðŸ“ Input (Your Prompt)")
         
         prompt_choice = st.selectbox(
             "Select a sample prompt or write your own:",
@@ -210,7 +257,7 @@ with tab1:
         if input_text:
             char_count = len(input_text)
             word_count = len(input_text.split())
-            st.caption(f"📏 {char_count} characters | {word_count} words | {input_tokens} tokens")
+            st.caption(f"ðŸ“ {char_count} characters | {word_count} words | {input_tokens} tokens")
             st.caption(f"📊 Ratio: ~{char_count/input_tokens:.1f} chars/token, ~{word_count/input_tokens:.2f} words/token")
     
     with col2:
@@ -555,7 +602,7 @@ with tab4:
     st.header("Step 4: Deep Dive Analysis")
     
     # Input vs Output cost analysis
-    st.subheader("⚖️ Why Output Tokens Cost More")
+    st.subheader("⚖ï¸ Why Output Tokens Cost More")
     
     st.markdown("""
     LLM providers charge more for output tokens because:
@@ -592,7 +639,7 @@ with tab4:
     st.plotly_chart(fig_ratio, use_container_width=True)
     
     # Provider comparison
-    st.subheader("🏢 Provider Comparison")
+    st.subheader("ðŸ¢ Provider Comparison")
     
     provider_summary = []
     for provider in set(p["provider"] for p in PRICING_DATA.values()):
@@ -613,7 +660,7 @@ with tab4:
     st.dataframe(pd.DataFrame(provider_summary), use_container_width=True, hide_index=True)
     
     # Heatmap: Cost by prompt length and response length
-    st.subheader("🗺️ Cost Heatmap: Prompt vs Response Length")
+    st.subheader("🗺ï¸ Cost Heatmap: Prompt vs Response Length")
     
     selected_model = st.selectbox("Select model for heatmap:", list(PRICING_DATA.keys()), index=1)
     
@@ -712,7 +759,7 @@ Full Results:
             summary += f"- {row['Model']}: {format_currency(row['Total Cost'])}/month\n"
         
         st.download_button(
-            label="📝 Download Summary",
+            label="ðŸ“ Download Summary",
             data=summary,
             file_name="llm_cost_summary.txt",
             mime="text/plain"
