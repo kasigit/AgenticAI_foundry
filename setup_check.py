@@ -44,7 +44,7 @@ def check_python():
         warn(f"{version_str} — Python 3.9 is too old for the agent demos (Module 2)")
         warn("CrewAI requires Python 3.10 or higher")
         info("Options: upgrade Python OR use Docker instead")
-        info("Modules 1 and 3 will still work fine with Python 3.9")
+        info("Modules 1, 3, and 4 (Demo Mode) will still work fine with Python 3.9")
         info("Upgrade Python: https://www.python.org/downloads/")
     else:
         fail(f"{version_str} — Python 3.10 or higher is required")
@@ -54,7 +54,7 @@ def check_python():
 def check_libraries():
     header("2. Required Python Libraries")
 
-    # Core libraries (Modules 1 & 3 — no API key needed)
+    # Core libraries (Modules 1, 3 & 4 — no API key needed for these)
     core = {
         "streamlit":  "Streamlit (the web app framework)",
         "plotly":     "Plotly (interactive charts)",
@@ -178,7 +178,7 @@ def check_openai():
         warn("OPENAI_API_KEY is set but looks unusual — double-check the value")
     else:
         info("No OpenAI API key set — this is fine")
-        info("Modules 1 & 3 don't need it. Module 2 can use Ollama instead.")
+        info("Modules 1, 3 & 4 (Demo Mode) don't need it. Module 2 can use Ollama instead.")
         info("To set it later: enter your key directly in the app sidebar")
 
 
@@ -187,7 +187,7 @@ def summary(results: dict):
     divider()
 
     if results.get("modules_1_3"):
-        ok("Modules 1 & 3 (Cost Explorer + MCP Explorer) — ready to run")
+        ok("Modules 1, 3 & 4 Demo Mode (Cost Explorer, MCP Explorer, Security Demo) — ready to run")
     else:
         fail("Modules 1 & 3 — missing core libraries (run: pip install -r requirements.txt)")
 
