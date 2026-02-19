@@ -190,7 +190,7 @@ else:
 st.sidebar.metric("Monthly Calls", f"{num_calls:,}")
 
 # Filter options
-st.sidebar.subheader("ðŸ” Filter Models")
+st.sidebar.subheader("📍 Filter Models")
 all_providers = list(set(p["provider"] for p in PRICING_DATA.values()))
 providers = st.sidebar.multiselect(
     "Providers",
@@ -221,7 +221,7 @@ with tab1:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("ðŸ“ Input (Your Prompt)")
+        st.subheader("📝 Input (Your Prompt)")
         
         prompt_choice = st.selectbox(
             "Select a sample prompt or write your own:",
@@ -257,7 +257,7 @@ with tab1:
         if input_text:
             char_count = len(input_text)
             word_count = len(input_text.split())
-            st.caption(f"ðŸ“ {char_count} characters | {word_count} words | {input_tokens} tokens")
+            st.caption(f"📏 {char_count} characters | {word_count} words | {input_tokens} tokens")
             st.caption(f"📊 Ratio: ~{char_count/input_tokens:.1f} chars/token, ~{word_count/input_tokens:.2f} words/token")
     
     with col2:
@@ -639,7 +639,7 @@ with tab4:
     st.plotly_chart(fig_ratio, use_container_width=True)
     
     # Provider comparison
-    st.subheader("ðŸ¢ Provider Comparison")
+    st.subheader("🏢 Provider Comparison")
     
     provider_summary = []
     for provider in set(p["provider"] for p in PRICING_DATA.values()):
@@ -759,7 +759,7 @@ Full Results:
             summary += f"- {row['Model']}: {format_currency(row['Total Cost'])}/month\n"
         
         st.download_button(
-            label="ðŸ“ Download Summary",
+            label="📝 Download Summary",
             data=summary,
             file_name="llm_cost_summary.txt",
             mime="text/plain"

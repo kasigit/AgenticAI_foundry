@@ -338,9 +338,9 @@ with st.expander("ℹï¸ How it works", expanded=False):
     st.markdown("""
     This demo runs **three AI agents** that collaborate sequentially:
     
-    1. **ðŸ” Researcher** - Gathers facts, statistics, and key insights
+    1. **📍 Researcher** - Gathers facts, statistics, and key insights
     2. **âœï¸ Writer** - Transforms research into clear, engaging prose  
-    3. **ðŸ“ Editor** - Polishes for clarity, accuracy, and professionalism
+    3. **📝 Editor** - Polishes for clarity, accuracy, and professionalism
     
     Each agent passes their work to the next, similar to a real content team.
     
@@ -352,7 +352,7 @@ with st.expander("ℹï¸ How it works", expanded=False):
     """)
 
 # Topic input
-st.subheader("ðŸ“ Research Topic")
+st.subheader("📝 Research Topic")
 
 col1, col2 = st.columns([3, 1])
 
@@ -421,7 +421,7 @@ if run_button and can_run:
         researcher_card = st.empty()
         researcher_card.markdown("""
         <div class="agent-card agent-researcher">
-            <strong>ðŸ” Researcher</strong><br/>
+            <strong>📍 Researcher</strong><br/>
             <span class="status-badge status-pending">Waiting...</span>
         </div>
         """, unsafe_allow_html=True)
@@ -439,7 +439,7 @@ if run_button and can_run:
         editor_card = st.empty()
         editor_card.markdown("""
         <div class="agent-card agent-editor">
-            <strong>ðŸ“ Editor</strong><br/>
+            <strong>📝 Editor</strong><br/>
             <span class="status-badge status-pending">Waiting...</span>
         </div>
         """, unsafe_allow_html=True)
@@ -466,10 +466,10 @@ if run_button and can_run:
         run_params["model"] = openai_model
     
     # Update UI to show running
-    status_text.text("ðŸ” Researcher is gathering information...")
+    status_text.text("📍 Researcher is gathering information...")
     researcher_card.markdown("""
     <div class="agent-card agent-researcher">
-        <strong>ðŸ” Researcher</strong><br/>
+        <strong>📍 Researcher</strong><br/>
         <span class="status-badge status-running">Working... â³</span>
     </div>
     """, unsafe_allow_html=True)
@@ -493,7 +493,7 @@ if run_button and can_run:
         # Researcher complete
         researcher_card.markdown(f"""
         <div class="agent-card agent-researcher">
-            <strong>ðŸ” Researcher</strong>
+            <strong>📍 Researcher</strong>
             <span class="status-badge status-done">Complete ✓</span><br/>
             <span class="time-badge">â±ï¸ {format_duration(researcher_data.duration_seconds if researcher_data else 0)}</span>
             <span class="token-badge">🔢 {format_tokens(researcher_data.total_tokens if researcher_data else 0)} tokens</span>
@@ -515,7 +515,7 @@ if run_button and can_run:
         # Editor complete
         editor_card.markdown(f"""
         <div class="agent-card agent-editor">
-            <strong>ðŸ“ Editor</strong>
+            <strong>📝 Editor</strong>
             <span class="status-badge status-done">Complete ✓</span><br/>
             <span class="time-badge">â±ï¸ {format_duration(editor_data.duration_seconds if editor_data else 0)}</span>
             <span class="token-badge">🔢 {format_tokens(editor_data.total_tokens if editor_data else 0)} tokens</span>
@@ -554,7 +554,7 @@ if run_button and can_run:
         if show_agent_outputs and result.task_outputs:
             with st.expander("👥 Individual Agent Outputs", expanded=True):
                 for agent_name, output in result.task_outputs.items():
-                    icon = "ðŸ”" if agent_name == "Researcher" else "âœï¸" if agent_name == "Writer" else "ðŸ“"
+                    icon = "📍" if agent_name == "Researcher" else "âœï¸" if agent_name == "Writer" else "📝"
                     agent_telem = next((a for a in telemetry.agents if a.agent_name == agent_name), None)
                     
                     st.markdown(f"**{icon} {agent_name}**")
