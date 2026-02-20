@@ -15,57 +15,16 @@ import streamlit as st
 import sys
 import os
 
-st.set_page_config(
-    page_title="LangChain Agent Demo",
-    page_icon="🔗",
-    layout="wide"
-)
-
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Friendly dependency check
-_missing = []
-try:
-    import langchain_community
-except ImportError:
-    _missing.append("langchain-community")
-try:
-    import langchain_openai
-except ImportError:
-    _missing.append("langchain-openai")
-
-if _missing:
-    st.error("⚠️ Missing required libraries: " + ", ".join(_missing))
-    st.markdown("""
-    ### Setup Required
-
-    The LangChain Agent Demo needs additional libraries installed.
-    Open your terminal, navigate to the project folder, and run:
-
-    ```
-    pip3 install -r requirements-crewai.txt
-    ```
-
-    Then stop the app with **Ctrl + C** and restart it:
-
-    ```
-    python3 -m streamlit run Home.py
-    ```
-
-    If you're using Docker, try rebuilding:
-    ```
-    docker build -t agenticai-foundry .
-    ```
-    """)
-    st.stop()
 
 from agents.crypto_agent import run_crypto_agent, AgentTelemetry
 
 
 def check_openai_key() -> bool:
-    """Check if OpenAI API key is configured."""
-    return bool(os.environ.get("OPENAI_API_KEY"))
+    """Check if OpenAI API key is configured (ignores dummy placeholder)."""
+    key = os.environ.get("OPENAI_API_KEY", "")
+    return bool(key) and not key.startswith("not-used-")
 
 
 def check_ollama_running() -> bool:
@@ -92,7 +51,7 @@ def check_ollama_running() -> bool:
 
 def render_telemetry(telemetry: AgentTelemetry):
     """Render telemetry data."""
-    st.subheader("📊 Telemetry")
+    st.subheader("ðŸ“Š Telemetry")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -118,28 +77,28 @@ def render_telemetry(telemetry: AgentTelemetry):
 def main():
     st.set_page_config(
         page_title="LangChain Agent Demo",
-        page_icon="🔗",
+        page_icon="ðŸ”—",
         layout="wide"
     )
     
-    st.title("🔗 LangChain Agent Demo")
+    st.title("ðŸ”— LangChain Agent Demo")
     st.markdown("**Single agent with web search tool** - Get real-time crypto prices")
     
     # Explanation
-    with st.expander("ℹ️ How This Works", expanded=False):
+    with st.expander("â„¹ï¸ How This Works", expanded=False):
         st.markdown("""
         ### LangChain vs CrewAI
         
         | Aspect | This Demo (LangChain) | Multi-Agent Demo (CrewAI) |
         |--------|----------------------|---------------------------|
-        | **Agents** | Single agent | Multiple agents (Researcher → Writer → Editor) |
+        | **Agents** | Single agent | Multiple agents (Researcher â†’ Writer â†’ Editor) |
         | **Approach** | Agent + Tools | Agent collaboration |
         | **Pattern** | ReAct (Reason + Act) | Sequential task handoff |
         
         ### The ReAct Pattern
         
         ```
-        Question → Thought → Action → Observation → ... → Final Answer
+        Question â†’ Thought â†’ Action â†’ Observation â†’ ... â†’ Final Answer
         ```
         
         The agent:
@@ -156,7 +115,7 @@ def main():
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.subheader("⚙️ Configuration")
+        st.subheader("âš™ï¸ Configuration")
         
         # Provider selection
         provider = st.radio(
@@ -177,11 +136,16 @@ def main():
             
             # Check API key
             if not check_openai_key():
-                st.warning("⚠️ OPENAI_API_KEY not set")
-                api_key = st.text_input("Enter API Key:", type="password")
-                if api_key:
-                    os.environ["OPENAI_API_KEY"] = api_key
-                    st.success("✅ API key set for this session")
+                st.warning("âš ï¸ OPENAI_API_KEY not set")
+                api_key_input = st.text_input("Enter API Key:", type="password",
+                                              key="openai_api_key_input")
+                if api_key_input:
+                    st.session_state["openai_api_key"] = api_key_input
+                    st.success("âœ… API key set for this session")
+            else:
+                env_key = os.environ.get("OPENAI_API_KEY", "")
+                if not env_key.startswith("not-used-"):
+                    st.session_state["openai_api_key"] = env_key
         else:
             model = st.selectbox(
                 "Model",
@@ -191,25 +155,25 @@ def main():
             
             # Check Ollama
             if not check_ollama_running():
-                st.warning("⚠️ Ollama not detected. Make sure it's running.")
+                st.warning("âš ï¸ Ollama not detected. Make sure it's running.")
     
     with col2:
-        st.subheader("💬 Query")
+        st.subheader("ðŸ’¬ Query")
         
         # Example queries
         st.markdown("**Try these examples:**")
         example_col1, example_col2 = st.columns(2)
         
         with example_col1:
-            if st.button("📈 Bitcoin & Ethereum prices", use_container_width=True):
+            if st.button("ðŸ“ˆ Bitcoin & Ethereum prices", use_container_width=True):
                 st.session_state.query = "What is the current price of Bitcoin and Ethereum?"
-            if st.button("🪙 Top 5 cryptos by market cap", use_container_width=True):
+            if st.button("ðŸª™ Top 5 cryptos by market cap", use_container_width=True):
                 st.session_state.query = "What are the top 5 cryptocurrencies by market cap and their current prices?"
         
         with example_col2:
-            if st.button("📊 Bitcoin vs last week", use_container_width=True):
+            if st.button("ðŸ“Š Bitcoin vs last week", use_container_width=True):
                 st.session_state.query = "What is Bitcoin's current price and how has it changed in the last week?"
-            if st.button("💡 Solana price today", use_container_width=True):
+            if st.button("ðŸ’¡ Solana price today", use_container_width=True):
                 st.session_state.query = "What is the current price of Solana?"
         
         # Query input
@@ -219,7 +183,7 @@ def main():
             height=80
         )
         
-        run_button = st.button("🚀 Run Agent", type="primary", use_container_width=True)
+        run_button = st.button("ðŸš€ Run Agent", type="primary", use_container_width=True)
     
     st.divider()
     
@@ -231,7 +195,7 @@ def main():
         # Status callback
         def status_callback(event_type, data):
             if event_type == "status":
-                status_container.info(f"🔄 {data}")
+                status_container.info(f"ðŸ”„ {data}")
                 # Update progress roughly
                 if "Initializing" in data:
                     progress_bar.progress(10)
@@ -251,6 +215,7 @@ def main():
             query=query,
             provider=provider_key,
             model_name=model,
+            api_key=st.session_state.get("openai_api_key") if provider_key == "openai" else None,
             callback=status_callback,
             verbose=False
         )
@@ -260,10 +225,10 @@ def main():
         progress_bar.empty()
         
         if result.success:
-            st.success("✅ Agent completed successfully!")
+            st.success("âœ… Agent completed successfully!")
             
             # Response
-            st.subheader("💬 Response")
+            st.subheader("ðŸ’¬ Response")
             st.markdown(result.response)
             
             # Telemetry
@@ -271,10 +236,10 @@ def main():
             render_telemetry(result.telemetry)
             
         else:
-            st.error(f"❌ Error: {result.error}")
+            st.error(f"âŒ Error: {result.error}")
             
             # Troubleshooting
-            with st.expander("🔧 Troubleshooting"):
+            with st.expander("ðŸ”§ Troubleshooting"):
                 if "OPENAI_API_KEY" in str(result.error):
                     st.markdown("**Solution:** Set your OpenAI API key above or switch to Ollama.")
                 elif "Connection" in str(result.error) or "refused" in str(result.error):
