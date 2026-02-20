@@ -6,7 +6,7 @@ A simple LangChain agent that uses web search to get current cryptocurrency pric
 Demonstrates tool-augmented reasoning with a single agent.
 
 This contrasts with CrewAI's multi-agent approach:
-- CrewAI: Multiple specialized agents collaborate (Researcher → Writer → Editor)
+- CrewAI: Multiple specialized agents collaborate (Researcher â†’ Writer â†’ Editor)
 - LangChain: Single agent with tools (Agent + Web Search Tool)
 """
 
@@ -79,18 +79,20 @@ def create_llm(provider: str = "openai", model_name: str = "gpt-4o-mini", api_ke
     Args:
         provider: "openai" or "ollama"
         model_name: Model name (e.g., "gpt-4o-mini", "llama3.2")
-        api_key: Explicit API key (avoids dummy placeholder set by research_crew.py)
+        api_key: Explicit API key (preferred over env var to avoid dummy placeholder)
     
     Returns:
         LLM instance
     """
     if provider == "openai":
         from langchain_openai import ChatOpenAI
-        # Prefer explicit key; reject the dummy placeholder set by research_crew.py
+        # Prefer explicit key; fall back to env var but reject the dummy placeholder
         env_key = os.environ.get("OPENAI_API_KEY", "")
         resolved_key = api_key or (env_key if not env_key.startswith("not-used-") else None)
         if not resolved_key:
-            raise ValueError("OpenAI API key not found. Please enter your key in the sidebar.")
+            raise ValueError(
+                "OpenAI API key not found. Please enter your key in the sidebar."
+            )
         return ChatOpenAI(
             model=model_name,
             temperature=0.3,
@@ -221,7 +223,7 @@ def run_crypto_agent(
         
         # Run the agent
         if callback:
-            callback("status", "🔍 Agent is thinking and searching...")
+            callback("status", "ðŸ” Agent is thinking and searching...")
         
         result = agent_executor.invoke({"input": query})
         
@@ -250,7 +252,7 @@ def run_crypto_agent(
         )
         
         if callback:
-            callback("status", "✅ Complete!")
+            callback("status", "âœ… Complete!")
             callback("telemetry", telemetry)
         
         return AgentResult(
@@ -285,9 +287,9 @@ if __name__ == "__main__":
     
     def status_callback(event_type, data):
         if event_type == "status":
-            print(f"  → {data}")
+            print(f"  â†’ {data}")
         elif event_type == "telemetry":
-            print(f"\n📊 Telemetry:")
+            print(f"\nðŸ“Š Telemetry:")
             print(f"   Duration: {data.duration_seconds:.2f}s")
             print(f"   Tokens: {data.total_tokens}")
             print(f"   Cost: ${data.estimated_cost_usd:.6f}")
@@ -302,7 +304,7 @@ if __name__ == "__main__":
     
     print("\n" + "=" * 60)
     if result.success:
-        print("✅ SUCCESS")
+        print("âœ… SUCCESS")
         print(f"\n{result.response}")
     else:
-        print(f"❌ ERROR: {result.error}")
+        print(f"âŒ ERROR: {result.error}")

@@ -5,65 +5,18 @@ Enhanced with additional visualizations
 """
 
 import streamlit as st
+import tiktoken
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import numpy as np
 
 st.set_page_config(
     page_title="LLM Cost Calculator",
     page_icon="📊",
     layout="wide"
 )
-
-# Friendly dependency check — shows a clear message instead of crashing
-_missing = []
-try:
-    import tiktoken
-except ImportError:
-    _missing.append("tiktoken")
-try:
-    import pandas as pd
-except ImportError:
-    _missing.append("pandas")
-try:
-    import plotly.express as px
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-except ImportError:
-    _missing.append("plotly")
-try:
-    import numpy as np
-except ImportError:
-    _missing.append("numpy")
-
-if _missing:
-    st.error("⚠️ Missing required libraries: " + ", ".join(_missing))
-    st.markdown("""
-    ### Setup Required
-
-    You need to install the app's dependencies before running it.
-    Open your terminal, navigate to the project folder, and run:
-
-    ```
-    pip3 install -r requirements.txt
-    pip3 install -r requirements-crewai.txt
-    ```
-
-    Then stop the app with **Ctrl + C** and restart it:
-
-    ```
-    python3 -m streamlit run Home.py
-    ```
-
-    If you're using Docker, this should not happen — try rebuilding:
-    ```
-    docker build -t agenticai-foundry .
-    ```
-    """)
-    st.stop()
-
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import numpy as np
 
 # ============================================================================
 # PRICING DATA (Per Million Tokens) - Updated January 2025
@@ -190,7 +143,7 @@ else:
 st.sidebar.metric("Monthly Calls", f"{num_calls:,}")
 
 # Filter options
-st.sidebar.subheader("📍 Filter Models")
+st.sidebar.subheader("🔍 Filter Models")
 all_providers = list(set(p["provider"] for p in PRICING_DATA.values()))
 providers = st.sidebar.multiselect(
     "Providers",
