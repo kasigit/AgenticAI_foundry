@@ -16,8 +16,51 @@ import os
 import time
 from pathlib import Path
 
+st.set_page_config(
+    page_title="Multi-Agent Demo",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Friendly dependency check
+_missing = []
+try:
+    import crewai
+except ImportError:
+    _missing.append("crewai")
+try:
+    import langchain_community
+except ImportError:
+    _missing.append("langchain-community")
+
+if _missing:
+    st.error("⚠️ Missing required libraries: " + ", ".join(_missing))
+    st.markdown("""
+    ### Setup Required
+
+    The Multi-Agent Demo needs additional libraries installed.
+    Open your terminal, navigate to the project folder, and run:
+
+    ```
+    pip3 install -r requirements-crewai.txt
+    ```
+
+    Then stop the app with **Ctrl + C** and restart it:
+
+    ```
+    python3 -m streamlit run Home.py
+    ```
+
+    If you're using Docker, try rebuilding:
+    ```
+    docker build -t agenticai-foundry .
+    ```
+    """)
+    st.stop()
 
 # Import crew logic
 try:
@@ -32,18 +75,6 @@ try:
 except ImportError as e:
     CREW_AVAILABLE = False
     IMPORT_ERROR = str(e)
-
-
-# =============================================================================
-# PAGE CONFIG
-# =============================================================================
-
-st.set_page_config(
-    page_title="Multi-Agent Demo",
-    page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Custom CSS
 st.markdown("""
@@ -271,28 +302,18 @@ with st.sidebar:
         api_key = None
         
     elif provider_choice == "openai":
-        # session_state persists the key across page navigations
-        saved_key = st.session_state.get("openai_api_key", "")
-        env_key = os.getenv("OPENAI_API_KEY", "")
-        default = saved_key or (env_key if not env_key.startswith("not-used-") else "")
-        api_key_input = st.text_input(
+        api_key = st.text_input(
             "OpenAI API Key",
             type="password",
-            value=default,
-            help="Enter your OpenAI API key — stored in session memory only, never saved to disk",
-            key="api_key_input_p2"
+            value=os.getenv("OPENAI_API_KEY", ""),
+            help="Enter your OpenAI API key or set OPENAI_API_KEY environment variable"
         )
-        # Store in session_state so page 3 can reuse it without re-entering
-        if api_key_input and not api_key_input.startswith("not-used-"):
-            st.session_state["openai_api_key"] = api_key_input
-            api_key = api_key_input
-        else:
-            api_key = st.session_state.get("openai_api_key", "")
+        # Filter out placeholder
+        if api_key and api_key.startswith("not-used-"):
+            api_key = ""
             
         if not api_key:
             st.warning("⚠️ API key required")
-        else:
-            st.success("✅ API key ready")
         
         openai_model = st.selectbox(
             "Model",
@@ -317,7 +338,7 @@ with st.expander("ℹ️ How it works", expanded=False):
     st.markdown("""
     This demo runs **three AI agents** that collaborate sequentially:
     
-    1. **🔍 Researcher** - Gathers facts, statistics, and key insights
+    1. **📍 Researcher** - Gathers facts, statistics, and key insights
     2. **✍️ Writer** - Transforms research into clear, engaging prose  
     3. **📝 Editor** - Polishes for clarity, accuracy, and professionalism
     
@@ -400,7 +421,7 @@ if run_button and can_run:
         researcher_card = st.empty()
         researcher_card.markdown("""
         <div class="agent-card agent-researcher">
-            <strong>🔍 Researcher</strong><br/>
+            <strong>📍 Researcher</strong><br/>
             <span class="status-badge status-pending">Waiting...</span>
         </div>
         """, unsafe_allow_html=True)
@@ -445,10 +466,10 @@ if run_button and can_run:
         run_params["model"] = openai_model
     
     # Update UI to show running
-    status_text.text("🔍 Researcher is gathering information...")
+    status_text.text("📍 Researcher is gathering information...")
     researcher_card.markdown("""
     <div class="agent-card agent-researcher">
-        <strong>🔍 Researcher</strong><br/>
+        <strong>📍 Researcher</strong><br/>
         <span class="status-badge status-running">Working... ⏳</span>
     </div>
     """, unsafe_allow_html=True)
@@ -472,7 +493,7 @@ if run_button and can_run:
         # Researcher complete
         researcher_card.markdown(f"""
         <div class="agent-card agent-researcher">
-            <strong>🔍 Researcher</strong>
+            <strong>📍 Researcher</strong>
             <span class="status-badge status-done">Complete ✓</span><br/>
             <span class="time-badge">⏱️ {format_duration(researcher_data.duration_seconds if researcher_data else 0)}</span>
             <span class="token-badge">🔢 {format_tokens(researcher_data.total_tokens if researcher_data else 0)} tokens</span>
@@ -533,7 +554,7 @@ if run_button and can_run:
         if show_agent_outputs and result.task_outputs:
             with st.expander("👥 Individual Agent Outputs", expanded=True):
                 for agent_name, output in result.task_outputs.items():
-                    icon = "🔍" if agent_name == "Researcher" else "✍️" if agent_name == "Writer" else "📝"
+                    icon = "📍" if agent_name == "Researcher" else "✍️" if agent_name == "Writer" else "📝"
                     agent_telem = next((a for a in telemetry.agents if a.agent_name == agent_name), None)
                     
                     st.markdown(f"**{icon} {agent_name}**")

@@ -211,8 +211,9 @@ docker build -t agenticai-foundry .
 
 You'll see lots of output. Wait until you see:
 ```
-Successfully built xxxxxxxxxx
-Successfully tagged agenticai-foundry:latest
+[+] Building X.Xs (13/13) FINISHED
+...
+=> => unpacking to docker.io/library/agenticai-foundry:latest
 ```
 
 ### Step 5: Run the Container
